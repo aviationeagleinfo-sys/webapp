@@ -8,8 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Console Musumeci">
-    <link class="apple-touch-icon" rel="apple-touch-icon" href="favicon.ico">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link class="apple-touch-icon" rel="apple-touch-icon" href="https://drgiuseppemusumeci.com/favicon.png">
 
     <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -382,7 +381,8 @@
                 const docRef = doc(db, "operatori", scannedCode);
                 const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
+                // Controllo se il documento esiste E se il campo 'name' è presente e non vuoto
+                if (docSnap.exists() && docSnap.data().name && docSnap.data().name.trim() !== "") {
                     scannerActive = false;
                     clearTimeout(errorTimeout);
                     
