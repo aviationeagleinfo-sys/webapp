@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Management Portal - Admin Mode</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans flex flex-col justify-between antialiased">
+
+    <header class="bg-white border-b border-slate-200 p-4 shadow-sm text-center sm:text-left">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <img src="https://webapp.drgiuseppemusumeci.com/favicon.ico" alt="Logo" class="w-9 h-9 object-contain">
+                <div class="text-left">
+                    <h1 class="text-md font-bold text-slate-900 tracking-wide uppercase">Anagrafica Centralizzata Personale</h1>
+                    <p class="text-[11px] text-slate-500 font-medium">Pannello Modifica Record Database</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-global-reset" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-1.5 rounded-lg transition">
+                    🔄 Reset Schermata
+                </button>
+                <div id="status-badge" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-200 text-slate-700 border border-slate-300">
+                    Pronto
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-2xl w-full mx-auto p-4 sm:p-6 flex-1 flex flex-col justify-center gap-6">
+        
+        <section id="admin-auth-section" class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
+            <div class="text-center sm:text-left">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-2">
+                    🔐 Accesso Area Riservata
+                </h2>
+                <p class="text-xs text-slate-500">Inserisci la chiave Master Amministratore per abilitare la modifica dei file.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="password" id="input-admin-master" placeholder="Chiave Master Amministratore..." 
+                       class="flex-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl font-mono text-center sm:text-left text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-teal-600 focus:bg-white transition-all">
+                <button id="btn-login-admin" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-6 py-3 rounded-xl transition shadow-md">
+                    Sblocca Terminale
+                </button>
+            </div>
+        </section>
+
+        <section id="admin-search-section" class="hidden bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4">
+            <div>
+                <h2 class="text-md font-bold text-slate-900">🔍 Seleziona Record Da Archivio</h2>
+                <p class="text-xs text-slate-500">Digita l'attuale ID unico del dipendente per estrarre la cartella dati.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="admin-target-code" placeholder="Codice ID attuale del dipendente..." class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-600 focus:bg-white transition-all">
+                <button id="btn-admin-load" class="bg-teal-700 hover:bg-teal-800 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-sm">Carica File</button>
+            </div>
+        </section>
+
+        <section id="admin-panel" class="hidden bg-white p-6 rounded-2xl shadow-lg border-2 border-teal-600 space-y-6">
+            <div class="border-b border-slate-200 pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900" id="admin-form-title">Editor Scheda Utente</h2>
+                    <p class="text-xs text-slate-500">Modifica i campi anagrafici primari o riassegna un nuovo codice hardware/ID.</p>
+                </div>
+                <span class="bg-teal-100 text-teal-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Sessione di Scrittura</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2 bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-1.5">
+                    <label class="block text-xs font-bold text-amber-900 uppercase tracking-wide">Codice Identificativo ID Documento (Modificabile)</label>
+                    <input type="text" id="adm-id-attuale" class="w-full px-3 py-2.5 bg-white border border-amber-300 rounded-lg text-sm font-mono text-amber-950 focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold">
+                    <p class="text-[10px] text-amber-700 leading-normal">⚠️ <strong>Attenzione:</strong> Modificando questo campo, il sistema salverà i dati correnti sotto la nuova chiave identificativa ed eliminerà automaticamente la vecchia per prevenire record duplicati disallineati.</p>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Nome Completo (fullname)</label>
+                    <input type="text" id="adm-fullname" placeholder="Es: Dr. Giuseppe Musumeci" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Operatore (name)</label>
+                    <input type="text" id="adm-name" placeholder="Es: Tecnico, Infermiere, Medico" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Mansione (mansione)</label>
+                    <input type="text" id="adm-mansione" placeholder="Es: Reparto Terapia Intensiva" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Grado di Livello</label>
+                    <select id="adm-grado" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                        <option value="Tecnico">Tecnico</option>
+                        <option value="OSS">OSS (Operatore Socio Sanitario)</option>
+                        <option value="Infermiere">Infermiere</option>
+                        <option value="Infermiere Coordinatore">Infermiere Coordinatore</option>
+                        <option value="Medico Specialista">Medico Specialista</option>
+                        <option value="Primario">Primario / Dirigente Medico</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Giorni Ferie Disponibili</label>
+                    <input type="number" id="adm-ferie" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Salario Mensile (€)</label>
+                    <input type="number" id="adm-salario" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+                <button id="btn-action-save" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                    💾 SALVA MODIFICHE E APPLICA NUOVO ID
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="p-4 text-center text-[10px] text-slate-400 font-medium tracking-wider uppercase border-t border-slate-200 bg-white">
+        Database Sync Administration Interface Core
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYcwhZdpOkNOJwt_2oIBGIDED4y7fVVm0",
+            authDomain: "staff-operatori-mg.firebaseapp.com",
+            projectId: "staff-operatori-mg",
+            storageBucket: "staff-operatori-mg.firebasestorage.app",
+            messagingSenderId: "797244866930",
+            appId: "1:797244866930:web:b93ca19a318711f8b89deb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const FIRESTORE_COLLECTION = "operatori";
+
+        // Elementi del DOM
+        const statusBadge = document.getElementById('status-badge');
+        const btnGlobalReset = document.getElementById('btn-global-reset');
+        
+        const adminAuthSection = document.getElementById('admin-auth-section');
+        const inputAdminMaster = document.getElementById('input-admin-master');
+        const btnLoginAdmin = document.getElementById('btn-login-admin');
+
+        const adminSearchSection = document.getElementById('admin-search-section');
+        const adminTargetCode = document.getElementById('admin-target-code');
+        const btnAdminLoad = document.getElementById('btn-admin-load');
+
+        const adminPanel = document.getElementById('admin-panel');
+        const adminFormTitle = document.getElementById('admin-form-title');
+        
+        const admIdAttuale = document.getElementById('adm-id-attuale');
+        const admFullname = document.getElementById('adm-fullname');
+        const admName = document.getElementById('adm-name');
+        const admMansione = document.getElementById('adm-mansione');
+        const admGrado = document.getElementById('adm-grado');
+        const admFerie = document.getElementById('adm-ferie');
+        const admSalario = document.getElementById('adm-salario');
+        const btnActionSave = document.getElementById('btn-action-save');
+
+        // Stati di sessione runtime
+        let originIDKey = null; 
+        let originFullDataPayload = {}; 
+        const ADMIN_MASTER_CODE = "6669992023";
+
+        function eseguiResetSchermata() {
+            originIDKey = null;
+            originFullDataPayload = {};
+            
+            inputAdminMaster.value = "";
+            adminTargetCode.value = "";
+            
+            admIdAttuale.value = "";
+            admFullname.value = "";
+            admName.value = "";
+            admMansione.value = "";
+            admFerie.value = "";
+            admSalario.value = "";
+
+            adminAuthSection.classList.remove('hidden');
+            adminSearchSection.classList.add('hidden');
+            adminPanel.classList.add('hidden');
+
+            statusBadge.textContent = "Pronto";
+            statusBadge.className = "text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-200 text-slate-700 border border-slate-300";
+        }
+
+        btnGlobalReset.addEventListener('click', eseguiResetSchermata);
+
+        btnLoginAdmin.addEventListener('click', () => {
+            const secret = inputAdminMaster.value.trim();
+            if (secret === ADMIN_MASTER_CODE) {
+                statusBadge.textContent = "Admin Sbloccato";
+                statusBadge.className = "text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+                
+                adminAuthSection.classList.add('hidden');
+                adminSearchSection.classList.remove('hidden');
+                adminTargetCode.focus();
+            } else {
+                alert("Chiave Master non riconosciuta. Accesso negato.");
+                inputAdminMaster.value = "";
+            }
+        });
+
+        btnAdminLoad.addEventListener('click', async () => {
+            const targetCode = adminTargetCode.value.trim();
+            if (!targetCode) {
+                alert("Digitare un codice identificativo valido.");
+                return;
+            }
+
+            statusBadge.textContent = "Lettura DB...";
+
+            try {
+                const docRef = doc(db, FIRESTORE_COLLECTION, targetCode);
+                const docSnap = await getDoc(docRef);
+
+                originIDKey = targetCode;
+                adminPanel.classList.remove('hidden');
+
+                if (docSnap.exists()) {
+                    originFullDataPayload = docSnap.data();
+                    adminFormTitle.innerHTML = `⚙️ Modifica Record: <span class="text-teal-700 font-mono font-bold">${targetCode}</span>`;
+                    
+                    admIdAttuale.value = targetCode;
+                    admFullname.value = originFullDataPayload.fullname || "";
+                    admName.value = originFullDataPayload.name || "";
+                    admMansione.value = originFullDataPayload.mansione || "";
+                    admGrado.value = originFullDataPayload.grado || "Tecnico";
+                    admFerie.value = originFullDataPayload.ferie !== undefined ? originFullDataPayload.ferie : 26;
+                    admSalario.value = originFullDataPayload.salario || 1600;
+
+                    statusBadge.textContent = "Record Caricato";
+                } else {
+                    originFullDataPayload = { ingressiUscite: [], cronologiaMansioni: [] };
+                    adminFormTitle.innerHTML = `🆕 Nuovo Record: <span class="text-blue-600 font-mono font-bold">${targetCode}</span>`;
+                    
+                    admIdAttuale.value = targetCode;
+                    admFullname.value = "";
+                    admName.value = "";
+                    admMansione.value = "";
+                    admGrado.value = "Tecnico";
+                    admFerie.value = 26;
+                    admSalario.value = 1600;
+
+                    statusBadge.textContent = "Nuovo File";
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Impossibile connettersi al database di rete.");
+                eseguiResetSchermata();
+            }
+        });
+
+        btnActionSave.addEventListener('click', async () => {
+            const finalIDKey = admIdAttuale.value.trim();
+            if (!finalIDKey) {
+                alert("L'ID Documento non può essere lasciato vuoto.");
+                return;
+            }
+
+            statusBadge.textContent = "Salvataggio...";
+            const oraModifica = new Date().toLocaleString('it-IT');
+
+            const logAzione = {
+                tipo: "Aggiornamento Anagrafica Admin",
+                data: oraModifica,
+                grado: admGrado.value,
+                mansione: admMansione.value.trim(),
+                salario: parseFloat(admSalario.value) || 0
+            };
+
+            const dataPackageStrutturato = {
+                ...originFullDataPayload, 
+                fullname: admFullname.value.trim(),
+                name: admName.value.trim(),         // Mappato su "name" (Operatore)
+                mansione: admMansione.value.trim(), // Mappato su "mansione" (Mansione)
+                grado: admGrado.value,
+                ferie: parseInt(admFerie.value, 10) || 0,
+                salario: parseFloat(admSalario.value) || 0,
+                cronologiaMansioni: arrayUnion(logAzione)
+            };
+
+            try {
+                const targetDocRef = doc(db, FIRESTORE_COLLECTION, finalIDKey);
+                await setDoc(targetDocRef, dataPackageStrutturato, { merge: true });
+
+                if (originIDKey && originIDKey !== finalIDKey) {
+                    const oldDocRef = doc(db, FIRESTORE_COLLECTION, originIDKey);
+                    await deleteDoc(oldDocRef);
+                }
+
+                alert(`Dati salvati separatamente. Registro ID aggiornato a: [${finalIDKey}].`);
+                eseguiResetSchermata();
+
+            } catch (err) {
+                console.error(err);
+                alert("Errore imprevisto durante le operazioni di scrittura/rimozione Firestore.");
+                statusBadge.textContent = "Errore IO";
+            }
+        });
+
+    </script>
+</body>
+</html>
