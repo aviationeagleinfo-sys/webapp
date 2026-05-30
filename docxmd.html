@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Documentale - Dr. Giuseppe Musumeci</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Console Musumeci">
+    <link class="apple-touch-icon" rel="apple-touch-icon" href="favicon.ico">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a896; 
+            --accent-hover: #028074;
+            --bg-color: #f4f7f9; 
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --error-color: #e53e3e;
+            --success-color: #38a169;
+            --admin-color: #805ad5;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg-color);
+            background-image: radial-gradient(circle at top right, rgba(0, 86, 179, 0.05), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(0, 168, 150, 0.05), transparent 40%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            margin-top: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 25px;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--card-border);
+            padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: #edf2f7;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .dynamic-section {
+            display: none;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 25px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .scanner-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 30px;
+            border: 2px dashed rgba(0, 86, 179, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .scanner-section.active { border-color: var(--primary-color); }
+        .scanner-section.error { border-color: var(--error-color); background: rgba(229, 62, 62, 0.02); }
+
+        .scanner-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+            animation: pulse 2.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .status-text { font-size: 1.2rem; font-weight: bold; color: var(--primary-color); margin-bottom: 8px; }
+        .error-text { display: none; color: var(--error-color); font-weight: bold; margin-top: 15px; }
+        .sub-text { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 25px; }
+
+        .input-container { display: flex; gap: 12px; width: 100%; max-width: 320px; margin-top: 10px; }
+        .input-container input[type="text"] { text-align: center; background: #ffffff; border: 1px solid #cbd5e0; }
+
+        .btn-unlock { background: var(--primary-color); color: white; border: none; padding: 12px 24px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .config-section { display: none; animation: fadeIn 0.5s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scanned-info {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-panel {
+            display: none;
+            background: #faf5ff;
+            border: 1px solid #d6bcfa;
+            border-left: 4px solid var(--admin-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .admin-title { color: var(--admin-color); margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; }
+        .btn-admin { background: var(--admin-color); color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .btn-admin:hover { background: #6b46c1; }
+
+        .form-group { margin-bottom: 25px; }
+        label { display: block; font-weight: 600; margin-bottom: 10px; color: var(--text-main); }
+
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            background: #ffffff;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            color: var(--text-main);
+            box-sizing: border-box;
+        }
+
+        select[multiple] { height: auto; min-height: 130px; padding: 8px; }
+        select[multiple] option { padding: 8px; border-radius: 4px; margin-bottom: 3px; font-weight: 500; }
+
+        .ente-terzo-input { display: none; margin-top: 15px; background: #edf2f7; padding: 15px; border-radius: 6px; }
+        .output-selection-container { display: flex; gap: 15px; margin-top: 30px; }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #004494 100%);
+            color: white; border: none; padding: 14px 28px; font-size: 1rem; font-weight: bold; border-radius: 6px; cursor: pointer; flex: 2;
+            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.15);
+        }
+
+        .select-format { flex: 1; font-weight: bold; background: #ffffff; cursor: pointer; }
+        .btn-reset { background: transparent; color: var(--text-muted); border: 1px solid #cbd5e0; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 30px; display: block; margin-left: auto; margin-right: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Console Operativa - Dr. Giuseppe Musumeci</h1>
+                
+        <div id="scannerSection" class="scanner-section active">
+            <div id="scannerIcon" class="scanner-icon">🔐</div>
+            <div id="statusText" class="status-text">SISTEMA DI VALIDAZIONE CREDENZIALI</div>
+            <div class="sub-text">Inserire il codice di sblocco della console professionale</div>
+                        
+            <div class="input-container">
+                <input type="text" id="manualCodeInput" placeholder="Codice autorizzazione..." autocomplete="off">
+                <button type="button" class="btn-unlock" id="btnUnlockManual">Sblocca</button>
+            </div>
+            <div id="errorDisplay" class="error-text">ACCESSO NEGATO. CODICE NON REGISTRATO O ERRORE DI RETE.</div>
+        </div>
+
+        <div id="configSection" class="config-section">
+            
+            <div id="adminPanel" class="admin-panel">
+                <h3 class="admin-title">🔑 PANNELLO AMMINISTRATORE (FIREBASE CLOUD)</h3>
+                <p style="margin: 0 0 15px 0; font-size: 0.9rem; color: #6b46c1;">Registrazione di nuove credenziali hardware direttamente nel cloud cifrato:</p>
+                <div class="grid-2" style="margin-bottom: 15px;">
+                    <div>
+                        <label style="color: #553c9a; font-size: 0.9rem;">Nuovo Codice Accesso:</label>
+                        <input type="text" id="newAuthCode" placeholder="Es. 99887766">
+                    </div>
+                    <div>
+                        <label style="color: #553c9a; font-size: 0.9rem;">Nome Operatore / Reparto:</label>
+                        <input type="text" id="newOperatorName" placeholder="Es. PROF. NERI">
+                    </div>
+                </div>
+                <button type="button" class="btn-admin" id="btnRegisterAdmin">Salva su Database Cloud</button>
+            </div>
+            
+            <div class="tab-container">
+                <button type="button" id="tab-paziente" class="tab-btn active">Documento Paziente</button>
+                <button type="button" id="tab-interno" class="tab-btn">Documento Interno</button>
+                <button type="button" id="tab-curante" class="tab-btn">Lettera al Medico Curante</button>
+            </div>
+
+            <div class="scanned-info">
+                <span>Inquadramento: <span style="color: var(--accent-color);">Libera Professione</span></span>
+                <span>Operatore: <span id="codeDisplay" style="color: var(--primary-color);">---</span></span>
+            </div>
+
+            <div id="section-paziente" class="dynamic-section" style="display: block;">
+                <h3 style="margin-top:0; color: var(--primary-color);">Dati Anagrafici Paziente</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Nome e Cognome Paziente:</label>
+                        <input type="text" id="pazNome" placeholder="Es. Mario Rossi">
+                    </div>
+                    <div class="form-group">
+                        <label>Codice Fiscale:</label>
+                        <input type="text" id="pazCF" placeholder="Es. RSSMRA80A01H501W">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Data di Nascita:</label>
+                    <input type="text" id="pazNascita" placeholder="Es. 01/01/1980">
+                </div>
+            </div>
+
+            <div id="section-curante" class="dynamic-section">
+                <h3 style="margin-top:0; color: var(--primary-color);">Dati Comunicazione Interprofessionale</h3>
+                <div class="form-group">
+                    <label>Destinatario (Dott. / Dott.ssa MMG):</label>
+                    <input type="text" id="curanteNome" placeholder="Es. Dott. Giovanni Bianchi">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Oggetto della Segnalazione Clinica:</label>
+                    <input type="text" id="curanteOggetto" placeholder="Es. Condivisione percorso terapeutico e follow-up pz.">
+                </div>
+            </div>
+
+            <div id="section-interno" class="dynamic-section">
+                <p style="margin:0; color: var(--text-muted); font-style: italic;">Modalità Interna Attiva: i dati generati verranno contrassegnati come note cliniche d'archivio.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="fileCodeInput">Codice Identificativo File / Protocollo:</label>
+                <input type="text" id="fileCodeInput" value="DM-2026-REG">
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                    <input type="checkbox" id="logoAE" checked> Includi Intestazione Ufficiale (Dr. Giuseppe Musumeci)
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="collabOption">Classificazioni e Diciture di Stato:</label>
+                <select id="collabOption" multiple>
+                    <option value="nessuna" selected>Nessuna dicitura aggiuntiva</option>
+                    <option value="uso_interno">⚠️ Dati Sensibili - Uso Interno Riservato</option>
+                    <option value="top_secret">🛑 TOP SECRET (Stile Fascicolo Cinematico)</option>
+                    <option value="bozza_progetto">📝 Bozza di Relazione (Draft)</option>
+                    <option value="ente_terzo">🏢 Includi Box Logo Ente Terzo Personalizzato</option>
+                </select>
+                                
+                <div id="enteTerzoContainer" class="ente-terzo-input">
+                    <div class="form-group">
+                        <label for="enteTerzoLabel">Dicitura Relazione Logo:</label>
+                        <input type="text" id="enteTerzoLabel" value="In collaborazione scientifica con:">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="enteTerzoUrl">URL completo del Logo Ente Terzo:</label>
+                        <input type="text" id="enteTerzoUrl" placeholder="https://esempio.com/logo-clinica.png">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="docContent">Corpo del Testo Clinico / Diagnostico:</label>
+                <textarea id="docContent" rows="6" placeholder="Inserire il testo del documento..."></textarea>
+            </div>
+
+            <div class="output-selection-container">
+                <select id="outputFormatSelect" class="select-format">
+                    <option value="pdf">Scarica .PDF (Ottimizzato File)</option>
+                    <option value="print">Stampa tramite Chrome (Anteprima)</option>
+                    <option value="docx">Esporta in Formato Word (.docx)</option>
+                </select>
+                <button type="button" class="btn-submit" id="btnProcessDoc">Elabora ed Esporta</button>
+            </div>
+
+            <button type="button" class="btn-reset" id="btnDisconnectConsole">Disconnetti Console</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Configurazione del tuo database Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYcwhZdpOkNOJwt_2oIBGIDED4y7fVVm0",
+            authDomain: "staff-operatori-mg.firebaseapp.com",
+            projectId: "staff-operatori-mg",
+            storageBucket: "staff-operatori-mg.firebasestorage.app",
+            messagingSenderId: "797244866930",
+            appId: "1:797244866930:web:b93ca19a318711f8b89deb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Variabili Stato Locale
+        const LOGO_MEDICO_FILE = "https://drgiuseppemusumeci.com/favicon.png";
+        let currentMode = "paziente";
+        let currentActiveOperator = "";
+        let currentActiveCode = "";
+        let barcodeBuffer = "";
+        let lastKeyTime = Date.now();
+        let scannerActive = true;
+        let errorTimeout = null;
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${mode}`).classList.add('active');
+            
+            document.getElementById('section-paziente').style.display = (mode === 'paziente') ? 'block' : 'none';
+            document.getElementById('section-interno').style.display = (mode === 'interno') ? 'block' : 'none';
+            document.getElementById('section-curante').style.display = (mode === 'curante') ? 'block' : 'none';
+        }
+
+        // Interrogazione asincrona sicura a Firebase Firestore
+        async function verifyScannedCode(scannedCode) {
+            if (!scannedCode) return;
+            try {
+                // Legge il documento che ha come ID il codice inserito nella collezione "operatori"
+                const docRef = doc(db, "operatori", scannedCode);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    scannerActive = false;
+                    clearTimeout(errorTimeout);
+                    
+                    currentActiveCode = scannedCode;
+                    currentActiveOperator = docSnap.data().name;
+                    
+                    document.getElementById("scannerSection").style.display = "none";
+                    document.getElementById("configSection").style.display = "block";
+                    document.getElementById("codeDisplay").innerText = `${currentActiveOperator} (${scannedCode})`;
+                    
+                    // Pannello Admin visibile solo se l'operatore è loggato come ADMIN
+                    if (scannedCode === "66699923" || currentActiveOperator === "ADMIN") {
+                        document.getElementById("adminPanel").style.display = "block";
+                    } else {
+                        document.getElementById("adminPanel").style.display = "none";
+                    }
+                } else {
+                    triggerScanError();
+                }
+            } catch (err) {
+                console.error("Errore di comunicazione con Firestore. Controlla le regole di sicurezza: ", err);
+                triggerScanError();
+            }
+        }
+
+        async function registerNewOperator() {
+            const codeInput = document.getElementById("newAuthCode");
+            const nameInput = document.getElementById("newOperatorName");
+            const code = codeInput.value.trim();
+            const name = nameInput.value.trim().toUpperCase();
+
+            if (!code || !name) { return alert("Compilare tutti i campi."); }
+
+            try {
+                await setDoc(doc(db, "operatori", code), { name: name });
+                alert(`Operatore registrato con successo nel cloud Firebase: ${name}`);
+                codeInput.value = ""; nameInput.value = "";
+            } catch (e) {
+                alert("Errore di scrittura su Firebase. Verifica i permessi di scrittura.");
+            }
+        }
+
+        function triggerScanError() {
+            const scannerSection = document.getElementById("scannerSection");
+            const statusText = document.getElementById("statusText");
+            const errorDisplay = document.getElementById("errorDisplay");
+            const inputField = document.getElementById("manualCodeInput");
+
+            clearTimeout(errorTimeout);
+            scannerSection.className = "scanner-section error";
+            statusText.innerText = "ACCESSO NEGATO";
+            errorDisplay.style.display = "block";
+            inputField.value = ""; 
+
+            errorTimeout = setTimeout(() => {
+                scannerSection.className = "scanner-section active";
+                statusText.innerText = "SISTEMA DI VALIDAZIONE CREDENZIALI";
+                errorDisplay.style.display = "none";
+                inputField.focus();
+            }, 2500);
+        }
+
+        // Eventi e Agganci dell'interfaccia ad isolamento di modulo
+        document.getElementById("btnUnlockManual").addEventListener("click", () => verifyScannedCode(document.getElementById("manualCodeInput").value.trim()));
+        document.getElementById("btnRegisterAdmin").addEventListener("click", registerNewOperator);
+        document.getElementById("btnProcessDoc").addEventListener("click", processDocumentExecution);
+        document.getElementById("btnDisconnectConsole").addEventListener("click", resetScanner);
+        
+        document.getElementById("tab-paziente").addEventListener("click", () => switchMode("paziente"));
+        document.getElementById("tab-interno").addEventListener("click", () => switchMode("interno"));
+        document.getElementById("tab-curante").addEventListener("click", () => switchMode("curante"));
+        document.getElementById("collabOption").addEventListener("change", () => {
+            const values = Array.from(document.getElementById("collabOption").selectedOptions).map(opt => opt.value);
+            document.getElementById("enteTerzoContainer").style.display = values.includes("ente_terzo") ? "block" : "none";
+        });
+
+        document.getElementById("manualCodeInput").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") { e.preventDefault(); verifyScannedCode(this.value.trim()); }
+        });
+
+        window.addEventListener("keydown", function(e) {
+            if (!scannerActive || document.activeElement === document.getElementById("manualCodeInput")) return;
+            const currentTime = Date.now();
+            if (currentTime - lastKeyTime > 120) barcodeBuffer = "";
+            lastKeyTime = currentTime;
+            if (e.key === "Enter") {
+                if (barcodeBuffer.length > 0) verifyScannedCode(barcodeBuffer.trim());
+                barcodeBuffer = ""; e.preventDefault(); return;
+            }
+            if (e.key.length === 1) barcodeBuffer += e.key;
+        });
+
+        function resetScanner() {
+            scannerActive = true;
+            currentActiveOperator = ""; currentActiveCode = "";
+            document.getElementById("scannerSection").style.display = "flex";
+            document.getElementById("configSection").style.display = "none";
+            document.getElementById("manualCodeInput").value = "";
+            switchMode("paziente");
+        }
+
+        // Funzioni Generazione File
+        function getImageDimensions(url) {
+            return new Promise((resolve) => {
+                const img = new Image(); img.crossOrigin = "Anonymous";
+                img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight, ratio: img.naturalWidth / img.naturalHeight });
+                img.onerror = () => resolve({ width: 150, height: 50, ratio: 3 });
+                img.src = url;
+            });
+        }
+
+        async function getLogoImageBuffer(url) {
+            try {
+                const response = await fetch(url, { mode: 'cors' });
+                if (!response.ok) return null;
+                const blob = await response.blob();
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsArrayBuffer(blob);
+                });
+            } catch (e) { return null; }
+        }
+
+        function processDocumentExecution() {
+            const format = document.getElementById("outputFormatSelect").value;
+            if (format === "docx") generateDocx();
+            else generatePdfOrPrint(format);
+        }
+
+        // GENERAZIONE DOCX
+        async function generateDocx() {
+            const selectedFileCode = document.getElementById("fileCodeInput").value.trim() || "DOC-MEDICO";
+            const serveAE = document.getElementById("logoAE").checked;
+            const opzioniSelezionate = Array.from(document.getElementById("collabOption").selectedOptions).map(opt => opt.value);
+            const enteTerzoLabel = document.getElementById("enteTerzoLabel").value.trim();
+            const enteTerzoUrl = document.getElementById("enteTerzoUrl").value.trim();
+            const testoCorpo = document.getElementById("docContent").value || "Nessun contenuto inserito.";
+
+            let headerElements = [
+                new docx.Paragraph({
+                    children: [new docx.TextRun({ text: "DR. GIUSEPPE MUSUMECI - LIBERA PROFESSIONE SANITARIA", bold: true, size: 16, font: "Arial", color: "0056B3" })],
+                    alignment: docx.AlignmentType.RIGHT
+                })
+            ];
+
+            let bodyElements = [];
+
+            if (opzioniSelezionate.includes("top_secret")) {
+                bodyElements.push(new docx.Paragraph({
+                    children: [new docx.TextRun({ text: "💥 CLASSIFIED: TOP SECRET 💥", bold: true, size: 36, font: "Courier New", color: "E53E3E" })],
+                    alignment: docx.AlignmentType.CENTER,
+                    spacing: { before: 2500, after: 150 }
+                }));
+                bodyElements.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
+            }
+
+            if (serveAE) {
+                const dims = await getImageDimensions(LOGO_MEDICO_FILE);
+                const imgBuf = await getLogoImageBuffer(LOGO_MEDICO_FILE);
+                if (imgBuf) {
+                    bodyElements.push(new docx.Paragraph({
+                        children: [new docx.ImageRun({ data: imgBuf, transformation: { width: 40 * dims.ratio, height: 40 } })],
+                        spacing: { after: 150 }
+                    }));
+                }
+            }
+
+            let titoloDoc = currentMode === 'paziente' ? "REFERTO MEDICO / DOCUMENTAZIONE PAZIENTE" : (currentMode === 'curante' ? "COMUNICAZIONE MEDICA INTERPROFESSIONALE" : "RELAZIONE INTERNA");
+
+            bodyElements.push(new docx.Paragraph({
+                children: [new docx.TextRun({ text: titoloDoc, bold: true, size: 24, font: "Arial", color: "2D3748" })],
+                spacing: { before: 100, after: 200 }
+            }));
+
+            let tableRows = [
+                new docx.TableRow({
+                    children: [
+                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: "Parametro", bold: true, font: "Arial", color: "FFFFFF" })] })], backgroundColor: "0056B3" }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: "Valore", bold: true, font: "Arial", color: "FFFFFF" })] })], backgroundColor: "0056B3" }),
+                    ]
+                }),
+                new docx.TableRow({
+                    children: [
+                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: "File ID", font: "Arial" })] })] }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: selectedFileCode, bold: true, font: "Arial" })] })] }),
+                    ]
+                }),
+                new docx.TableRow({
+                    children: [
+                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: "Operatore", font: "Arial" })] })] }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: currentActiveOperator, bold: true, font: "Arial" })] })] }),
+                    ]
+                })
+            ];
+
+            bodyElements.push(new docx.Table({ rows: tableRows, width: { size: 100, type: docx.WidthType.PERCENTAGE }, spacing: { after: 300 } }));
+
+            bodyElements.push(
+                new docx.Paragraph({ children: [new docx.TextRun({ text: "VALUTAZIONE CLINICA", bold: true, size: 18, font: "Arial", color: "0056B3" })], spacing: { before: 200, after: 120 } }),
+                new docx.Paragraph({ children: [new docx.TextRun({ text: testoCorpo, font: "Arial" })] })
+            );
+
+            const doc = new docx.Document({ sections: [{ headers: { default: new docx.Header({ children: headerElements }) }, children: bodyElements }] });
+            docx.Packer.toBlob(doc).then((blob) => saveAs(blob, `Documento_Musumeci_${selectedFileCode}.docx`));
+        }
+
+        // GENERAZIONE PDF / ANTEPRIMA STAMPA CON MARGINI DI BORDO DIRETTI
+        function generatePdfOrPrint(actionType) {
+            const selectedFileCode = document.getElementById("fileCodeInput").value.trim() || "DOC-MEDICO";
+            const serveAE = document.getElementById("logoAE").checked;
+            const opzioniSelezionate = Array.from(document.getElementById("collabOption").selectedOptions).map(opt => opt.value);
+            const enteTerzoLabel = document.getElementById("enteTerzoLabel").value.trim();
+            const enteTerzoUrl = document.getElementById("enteTerzoUrl").value.trim();
+            const testoCorpo = document.getElementById("docContent").value || "Nessun contenuto inserito.";
+
+            let imgAEHtml = serveAE ? `<img src="${LOGO_MEDICO_FILE}" style="height:42px; width:auto;">` : '';
+            let titoloDoc = currentMode === 'paziente' ? "REFERTO MEDICO / DOCUMENTAZIONE PAZIENTE" : (currentMode === 'curante' ? "LETTERA AL MEDICO CURANTE" : "NOTE CLINICHE ED ARCHIVIO INTERNO");
+
+            let specificMetaHtml = "";
+            if (currentMode === 'paziente') {
+                specificMetaHtml = `
+                    <tr><td><strong>Paziente</strong></td><td>${document.getElementById('pazNome').value || '---'}</td></tr>
+                    <tr><td><strong>Codice Fiscale</strong></td><td>${document.getElementById('pazCF').value || '---'}</td></tr>`;
+            }
+
+            let topSecretCoverHtml = "";
+            if (opzioniSelezionate.includes("top_secret")) {
+                topSecretCoverHtml = `
+                    <div class="page-cover-topsecret">
+                        <div class="classified-banner">💥 CLASSIFIED: TOP SECRET 💥</div>
+                        <div style="margin-top: 100px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 2; text-align:center; color: #4a5568;">
+                            <p><strong>REGISTRO FILE ID:</strong> ${selectedFileCode}</p>
+                            <p><strong>FIRMATARIO:</strong> ${currentActiveOperator}</p>
+                            <p><strong>VALIDAZIONE:</strong> FIREBASE CLOUD SYSTEM VERIFIED</p>
+                        </div>
+                    </div>`;
+            }
+
+            let boxCollaborazioneHtml = "";
+            if (opzioniSelezionate.includes("ente_terzo") && enteTerzoUrl) {
+                boxCollaborazioneHtml = `
+                    <div style="border: 1px solid #e2e8f0; border-left: 4px solid #0056b3; padding: 15px; border-radius: 6px; margin: 25px 0; background-color: #f8fafc;">
+                        <span style="font-size: 11px; font-weight: bold; color: #0056b3; display:block; margin-bottom:8px;">${enteTerzoLabel}</span>
+                        <img src="${enteTerzoUrl}" style="max-height: 45px; width: auto;">
+                    </div>`;
+            }
+
+            const printWindow = window.open("", "_blank");
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${selectedFileCode}</title>
+                    <style>
+                        /* CONFIGURAZIONE DI BORDO E MARGINI REALI PER PDF E STAMPA */
+                        @page {
+                            size: A4;
+                            margin: 25mm 20mm 25mm 20mm; /* Ampio spazio ai bordi (Su, Destra, Giù, Sinistra) */
+                        }
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            color: #2d3748; 
+                            margin: 0; 
+                            padding: 0; 
+                            font-size: 14px;
+                            line-height: 1.6;
+                        }
+                        .page-cover-topsecret { 
+                            page-break-after: always; 
+                            padding-top: 120px; 
+                            height: 80vh;
+                            box-sizing: border-box;
+                        }
+                        .classified-banner {
+                            border: 6px dashed #e53e3e; color: #e53e3e; font-size: 34px; font-weight: bold; 
+                            text-align: center; padding: 25px; margin: 0 auto; max-width: 90%; letter-spacing: 4px;
+                            font-family: 'Courier New', monospace; background-color: rgba(229, 62, 62, 0.02);
+                        }
+                        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px; }
+                        .meta-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        .meta-table th, .meta-table td { border: 1px solid #e2e8f0; padding: 10px; font-size: 13px; text-align: left; }
+                        .meta-table th { background-color: #0056b3; color: white; }
+                        .content { font-size: 14px; line-height: 1.7; white-space: pre-wrap; margin-top: 25px; text-align: justify; }
+                        .page-footer-fascicolo { border-top: 1px dashed #cbd5e0; margin-top: 50px; padding-top: 10px; font-size: 11px; color: #a0aec0; display: flex; justify-content: space-between; }
+                    </style>
+                </head>
+                <body>
+                    ${topSecretCoverHtml}
+
+                    <div class="header">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            ${imgAEHtml}
+                            <span style="font-weight:bold; color:#0056b3; font-size:16px;">Dr. Giuseppe Musumeci</span>
+                        </div>
+                        <div style="text-align:right; font-size:11px; color:#718096; font-weight:bold;">
+                            LIBERA PROFESSIONE SANITARIA<br><span style="color:#38a169;">VALIDAZIONE DIGITALE</span>
+                        </div>
+                    </div>
+
+                    <h2>${titoloDoc}</h2>
+
+                    <table class="meta-table">
+                        <thead><tr><th>Riferimento di Registro</th><th>Dettaglio Identificativo</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Codice Identificativo Documento</strong></td><td style="color:#0056b3; font-weight:bold;">${selectedFileCode}</td></tr>
+                            <tr><td><strong>Operatore Validante</strong></td><td>${currentActiveOperator}</td></tr>
+                            ${specificMetaHtml}
+                        </tbody>
+                    </table>
+
+                    ${boxCollaborazioneHtml}
+
+                    <h4 style="color:#0056b3; margin-top:30px; border-bottom:1px solid #e2e8f0; padding-bottom:5px; text-transform: uppercase;">Valutazione Clinica e Diagnostica</h4>
+                    <div class="content">${testoCorpo}</div>
+
+                    <div class="page-footer-fascicolo">
+                        <span>Fascicolo Registro: ${selectedFileCode}</span>
+                        <span>Operatore Cloud: ${currentActiveOperator}</span>
+                    </div>
+
+                    <script>
+                        window.onload = function() {
+                            setTimeout(() => {
+                                window.print();
+                                ${actionType === 'pdf' ? '' : 'window.close();'}
+                            }, 400);
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+    </script>
+</body>
+</html>
