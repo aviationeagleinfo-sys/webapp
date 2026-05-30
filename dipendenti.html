@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Staff Management</title>
+    <link class="js-meta-favicon" rel="icon" type="image/x-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .custom-teal { color: #0f766e; }
+        .bg-custom-teal { background-color: #0f766e; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
+
+    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="https://webapp.drgiuseppemusumeci.com/favicon.ico" alt="Logo" class="w-10 h-10 object-contain">
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900">HealthCare Portal</h1>
+                    <p class="text-xs text-slate-500">Gestione e Monitoraggio Personale Sanitario</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="btn-global-reset" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-2.5 py-1 rounded-md transition">
+                    🔄 Reset Portale
+                </button>
+                <div id="status-badge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-600">
+                    Pronto
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <section id="search-section" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
+            <h2 class="text-lg font-semibold mb-4 text-slate-900 flex items-center gap-2">
+                🔑 Inserisci il Codice Identificativo
+            </h2>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="input-codice" placeholder="Codice Operatore o Admin..." 
+                       class="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:outline-none text-lg tracking-wider">
+                <button id="btn-accedi" class="bg-teal-700 hover:bg-teal-800 text-white font-medium px-6 py-3 rounded-xl transition duration-200 shadow-sm">
+                    Verifica Codice
+                </button>
+            </div>
+            <p id="search-error" class="text-red-600 text-sm mt-2 hidden"></p>
+        </section>
+
+        <section id="employee-dashboard" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2.5 py-1 rounded-md" id="emp-badge-grado">Grado</span>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-2" id="emp-nome">Nome Operatore</h2>
+                    <p class="text-slate-500" id="emp-mansione">Mansione Corrente</p>
+                    <p class="text-xs text-slate-400 mt-1">Codice Documento (ID): <span id="emp-id-doc" class="font-mono"></span></p>
+                </div>
+                <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                    <button id="btn-clock-in" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">Registra Ingresso</button>
+                    <button id="btn-clock-out" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">Registra Uscita</button>
+                </div>
+            </div>
+
+            <div id="anomalie-container" class="hidden space-y-2">
+                </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                    <div class="p-3 bg-amber-50 rounded-xl text-amber-600 text-2xl">📅</div>
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium">Ferie Rimanenti</p>
+                        <p class="text-xl font-bold text-slate-900" id="emp-ferie">0 Giorni</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600 text-2xl">💶</div>
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium">Salario Mensile</p>
+                        <p class="text-xl font-bold text-slate-900" id="emp-salario">€ 0.00</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4 border-l-4 border-l-teal-600">
+                    <div class="p-3 bg-teal-50 rounded-xl text-teal-600 text-2xl">⏱️</div>
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium">Ore Totali Lavorate</p>
+                        <p class="text-lg font-bold text-slate-950 font-mono" id="emp-ore-totali">00h 00m 00s</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2">🕒 Registro Ingressi / Uscite</h3>
+                    <div class="overflow-y-auto max-h-60 border border-slate-100 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase border-b border-slate-100">
+                                    <th class="p-3">Evento</th>
+                                    <th class="p-3">Data e Ora</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-orari-body" class="text-sm divide-y divide-slate-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2">📜 Storico Avanzamento & Carriera</h3>
+                    <div class="overflow-y-auto max-h-60 border border-slate-100 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase border-b border-slate-100">
+                                    <th class="p-3">Evento</th>
+                                    <th class="p-3">Dettagli</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-cronologia-body" class="text-sm divide-y divide-slate-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-panel" class="hidden space-y-6 bg-white p-6 rounded-2xl shadow-md border-2 border-amber-400">
+            <div class="border-b border-slate-200 pb-4 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-950 flex items-center gap-2">🛡️ Area Amministrativa Protetta</h2>
+                    <p class="text-xs text-slate-500">Modifica del campo "fullname" e innesto di ferie/orari/salario.</p>
+                </div>
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Livello Master</span>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Inserisci il codice operatore da gestire:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="admin-target-code" placeholder="Codice documento operatore..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                    <button id="btn-admin-load" class="bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-900 transition">Carica Dati</button>
+                </div>
+            </div>
+
+            <div id="admin-form-container" class="space-y-4 opacity-50 pointer-events-none transition-opacity duration-200">
+                <h3 class="text-md font-bold text-slate-800" id="admin-form-title">Dati sul Database</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome Completo (fullname)</label>
+                        <input type="text" id="adm-nome" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Giorni Ferie Rimanenti</label>
+                        <input type="number" id="adm-ferie" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Grado Attuale</label>
+                        <select id="adm-grado" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                            <option value="OSS">OSS (Operatore Socio Sanitario)</option>
+                            <option value="Tecnico">Tecnico</option>
+                            <option value="Infermiere">Infermiere</option>
+                            <option value="Infermiere Coordinatore">Infermiere Coordinatore</option>
+                            <option value="Medico Specialista">Medico Specialista</option>
+                            <option value="Primario">Primario / Dirigente Medico</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mansione Specificata</label>
+                        <input type="text" id="adm-mansione" placeholder="Es. Reparto Terapia Intensiva" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Salario Mensile (€)</label>
+                        <input type="number" id="adm-salario" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-2">
+                    <button id="btn-action-save" class="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg flex-1 transition">
+                        💾 Salva / Aggiorna Dati e "fullname"
+                    </button>
+                    <button id="btn-action-promote" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+                        🚀 Promuovi e Aumenta Salario (+15%)
+                    </button>
+                    <button id="btn-action-demote" class="bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+                        📉 Degrada e Riduci Salario (-10%)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYcwhZdpOkNOJwt_2oIBGIDED4y7fVVm0",
+            authDomain: "staff-operatori-mg.firebaseapp.com",
+            projectId: "staff-operatori-mg",
+            storageBucket: "staff-operatori-mg.firebasestorage.app",
+            messagingSenderId: "797244866930",
+            appId: "1:797244866930:web:b93ca19a318711f8b89deb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const FIRESTORE_COLLECTION = "operatori";
+
+        // Riferimenti DOM
+        const inputCodice = document.getElementById('input-codice');
+        const btnAccedi = document.getElementById('btn-accedi');
+        const searchError = document.getElementById('search-error');
+        const statusBadge = document.getElementById('status-badge');
+        const btnGlobalReset = document.getElementById('btn-global-reset');
+
+        const empDashboard = document.getElementById('employee-dashboard');
+        const empNome = document.getElementById('emp-nome');
+        const empGrado = document.getElementById('emp-badge-grado');
+        const empMansione = document.getElementById('emp-mansione');
+        const empIdDoc = document.getElementById('emp-id-doc');
+        const empFerie = document.getElementById('emp-ferie');
+        const empSalario = document.getElementById('emp-salario');
+        const empOreTotali = document.getElementById('emp-ore-totali');
+        const anomalieContainer = document.getElementById('anomalie-container');
+        
+        const tableOrariBody = document.getElementById('table-orari-body');
+        const tableCronologiaBody = document.getElementById('table-cronologia-body');
+        const btnClockIn = document.getElementById('btn-clock-in');
+        const btnClockOut = document.getElementById('btn-clock-out');
+
+        const adminPanel = document.getElementById('admin-panel');
+        const adminTargetCode = document.getElementById('admin-target-code');
+        const btnAdminLoad = document.getElementById('btn-admin-load');
+        const adminFormContainer = document.getElementById('admin-form-container');
+        const adminFormTitle = document.getElementById('admin-form-title');
+        
+        const admNome = document.getElementById('adm-nome');
+        const admFerie = document.getElementById('adm-ferie');
+        const admGrado = document.getElementById('adm-grado');
+        const admMansione = document.getElementById('adm-mansione');
+        const admSalario = document.getElementById('adm-salario');
+
+        const btnActionSave = document.getElementById('btn-action-save');
+        const btnActionPromote = document.getElementById('btn-action-promote');
+        const btnActionDemote = document.getElementById('btn-action-demote');
+
+        let currentLoadedEmployeeCode = null;
+        let adminActiveTargetCode = null;
+        const ADMIN_MASTER_CODE = "6669992023";
+
+        function eseguiResetSchermata() {
+            currentLoadedEmployeeCode = null;
+            adminActiveTargetCode = null;
+            inputCodice.value = "";
+            searchError.classList.add('hidden');
+            anomalieContainer.classList.add('hidden');
+            anomalieContainer.innerHTML = "";
+            
+            statusBadge.textContent = "Pronto";
+            statusBadge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-600";
+            
+            empDashboard.classList.add('hidden');
+            adminPanel.classList.add('hidden');
+            
+            adminTargetCode.value = "";
+            adminFormContainer.classList.add('opacity-50', 'pointer-events-none');
+            adminFormTitle.innerHTML = "Dati sul Database";
+            admNome.value = "";
+            admFerie.value = "";
+            admGrado.value = "OSS";
+            admMansione.value = "";
+            admSalario.value = "";
+        }
+
+        btnGlobalReset.addEventListener('click', eseguiResetSchermata);
+
+        // --- GESTIONE CALCOLO ORE E ANOMALIE TIMBRATURE ---
+        function analizzaECalcolaTempi(ingressiUscite) {
+            let millisecondiTotali = 0;
+            let anomalieHtml = "";
+            let ultimoIngressoMs = null;
+
+            if (!ingressiUscite || ingressiUscite.length === 0) {
+                return { tempoFormattato: "00h 00m 00s", anomalieHtml };
+            }
+
+            // Ordina i log dal più vecchio al più recente per una corretta analisi sequenziale
+            const logsOrdinati = [...ingressiUscite].sort((a, b) => {
+                return convertiStringaInData(a.timestamp) - convertiStringaInData(b.timestamp);
+            });
+
+            logsOrdinati.forEach(log => {
+                const dataLog = convertiStringaInData(log.timestamp);
+                if (!dataLog) return;
+                const logMs = dataLog.getTime();
+
+                if (log.tipo === 'ingresso') {
+                    if (ultimoIngressoMs !== null) {
+                        // ANOMALIA: Doppio ingresso consecutivo rilevato
+                        anomalieHtml += `<div class="bg-amber-50 border border-amber-300 text-amber-800 text-xs px-4 py-2 rounded-xl">⚠️ <strong>Anomalia:</strong> Rilevato un secondo ingresso senza uscita in mezzo il ${log.timestamp}. Il blocco precedente è stato annullato.</div>`;
+                    }
+                    ultimoIngressoMs = logMs;
+                } else if (log.tipo === 'uscita') {
+                    if (ultimoIngressoMs === null) {
+                        // ANOMALIA: Uscita senza ingresso prima
+                        anomalieHtml += `<div class="bg-rose-50 border border-rose-300 text-rose-800 text-xs px-4 py-2 rounded-xl">⚠️ <strong>Anomalia:</strong> Rilevata un'uscita senza alcun ingresso precedente associato il ${log.timestamp}. Tempo ignorato.</div>`;
+                    } else {
+                        // Sessione valida: calcola la differenza di tempo
+                        millisecondiTotali += (logMs - ultimoIngressoMs);
+                        ultimoIngressoMs = null; // Resetta la sessione completata
+                    }
+                }
+            });
+
+            // Se l'operatore è attualmente dentro (ultimo ingresso non chiuso), calcola il tempo parziale fino ad ora
+            if (ultimoIngressoMs !== null) {
+                const adessoMs = new Date().getTime();
+                if (adessoMs > ultimoIngressoMs) {
+                    millisecondiTotali += (adessoMs - ultimoIngressoMs);
+                }
+            }
+
+            // Conversione matematica in Ore, Minuti e Secondi
+            let secondiTotali = Math.floor(millisecondiTotali / 1000);
+            let ore = Math.floor(secondiTotali / 3600);
+            secondiTotali %= 3600;
+            let minuti = Math.floor(secondiTotali / 60);
+            let secondi = secondiTotali % 60;
+
+            // Formattazione con zero iniziale fisso (es. 02h 05m 09s)
+            const oreF = String(ore).padStart(2, '0');
+            const minF = String(minuti).padStart(2, '0');
+            const secF = String(secondi).padStart(2, '0');
+
+            return {
+                tempoFormattato: `${oreF}h ${minF}m ${secF}s`,
+                anomalieHtml: anomalieHtml
+            };
+        }
+
+        // Helper per convertire in modo sicuro la stringa locale "GG/MM/AAAA, OOO:MM:SS" di Firestore in oggetto Date JavaScript
+        function convertiStringaInData(str) {
+            try {
+                // Rileva formati standard o separati da virgola/spazi
+                const parti = str.split(/[\s,]+/);
+                const dataParti = parti[0].split('/');
+                const oraParti = parti[1].split(':');
+
+                const giorno = parseInt(dataParti[0], 10);
+                const mese = parseInt(dataParti[1], 10) - 1; // Mesi base 0 in JS
+                const anno = parseInt(dataParti[2], 10);
+
+                const ore = parseInt(oraParti[0], 10);
+                const minuti = parseInt(oraParti[1], 10);
+                const secondi = parseInt(oraParti[2], 10);
+
+                return new Date(anno, mese, giorno, ore, minuti, secondi);
+            } catch (e) {
+                console.error("Formato data non valido: " + str);
+                return null;
+            }
+        }
+
+        // --- ACCESSO UTENTE ---
+        btnAccedi.addEventListener('click', async () => {
+            const codice = inputCodice.value.trim();
+            searchError.classList.add('hidden');
+            
+            if (!codice) {
+                showError("Inserisci un codice valido.");
+                return;
+            }
+
+            if (codice === ADMIN_MASTER_CODE) {
+                statusBadge.textContent = "Modalità Admin";
+                statusBadge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-amber-100 text-amber-800";
+                adminPanel.classList.remove('hidden');
+                empDashboard.classList.add('hidden');
+                inputCodice.value = "";
+                return;
+            }
+
+            statusBadge.textContent = "Ricerca in corso...";
+            try {
+                const docRef = doc(db, FIRESTORE_COLLECTION, codice);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    currentLoadedEmployeeCode = codice;
+                    renderEmployeeDashboard(docSnap.data(), codice);
+                    statusBadge.textContent = "Operatore Connesso";
+                    statusBadge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800";
+                } else {
+                    showError("Nessun operatore trovato con questo codice.");
+                    empDashboard.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error(error);
+                showError("Errore di caricamento da Firestore.");
+            }
+        });
+
+        function showError(msg) {
+            searchError.textContent = msg;
+            searchError.classList.remove('hidden');
+        }
+
+        function renderEmployeeDashboard(data, codice) {
+            empDashboard.classList.remove('hidden');
+            adminPanel.classList.add('hidden');
+
+            empNome.textContent = data.fullname || "N/D";
+            empGrado.textContent = data.grado || "N/D";
+            empMansione.textContent = data.mansione || "N/D";
+            empIdDoc.textContent = codice;
+            empFerie.textContent = `${data.ferie !== undefined ? data.ferie : 0} Giorni`;
+            empSalario.textContent = `€ ${(data.salario || 0).toLocaleString('it-IT', {minimumFractionDigits: 2})}`;
+
+            // Esecuzione calcolo orari e gestione anomalie
+            const analisilavoro = analizzaECalcolaTempi(data.ingressiUscite);
+            empOreTotali.textContent = analisilavoro.tempoFormattato;
+
+            if (analisilavoro.anomalieHtml !== "") {
+                anomalieContainer.innerHTML = analisilavoro.anomalieHtml;
+                anomalieContainer.classList.remove('hidden');
+            } else {
+                anomalieContainer.classList.add('hidden');
+                anomalieContainer.innerHTML = "";
+            }
+
+            // Tabella Ingressi / Uscite
+            tableOrariBody.innerHTML = "";
+            if (data.ingressiUscite && data.ingressiUscite.length > 0) {
+                [...data.ingressiUscite].reverse().forEach(log => {
+                    const badgeClass = log.tipo === 'ingresso' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700';
+                    tableOrariBody.innerHTML += `
+                        <tr>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${badgeClass}">${log.tipo.toUpperCase()}</span></td>
+                            <td class="p-3 text-xs text-slate-600">${log.timestamp}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableOrariBody.innerHTML = `<tr><td colspan="2" class="p-3 text-center text-xs text-slate-400">Nessun movimento registrato</td></tr>`;
+            }
+
+            // Tabella Cronologia
+            tableCronologiaBody.innerHTML = "";
+            if (data.cronologiaMansioni && data.cronologiaMansioni.length > 0) {
+                [...data.cronologiaMansioni].reverse().forEach(cron => {
+                    tableCronologiaBody.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3">
+                                <span class="block text-xs font-bold text-slate-700">${cron.tipo.toUpperCase()}</span>
+                                <span class="text-[10px] text-slate-400">${cron.data}</span>
+                            </td>
+                            <td class="p-3 text-xs text-slate-600">
+                                <strong>Mansione:</strong> ${cron.mansione || 'N/D'}<br>
+                                <strong>Grado:</strong> ${cron.grado || 'N/D'}<br>
+                                <strong>Salario:</strong> € ${cron.salario || 0}
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableCronologiaBody.innerHTML = `<tr><td colspan="2" class="p-3 text-center text-xs text-slate-400">Nessuno storico presente</td></tr>`;
+            }
+        }
+
+        // --- REGISTRAZIONE MOVIMENTI ---
+        async function registraPresenza(tipo) {
+            if (!currentLoadedEmployeeCode) return;
+            const oraCorrente = new Date().toLocaleString('it-IT');
+            const docRef = doc(db, FIRESTORE_COLLECTION, currentLoadedEmployeeCode);
+
+            try {
+                await updateDoc(docRef, {
+                    ingressiUscite: arrayUnion({
+                        tipo: tipo,
+                        timestamp: oraCorrente
+                    })
+                });
+                const docSnap = await getDoc(docRef);
+                renderEmployeeDashboard(docSnap.data(), currentLoadedEmployeeCode);
+            } catch (error) {
+                alert("Errore nell'invio del movimento.");
+            }
+        }
+
+        btnClockIn.addEventListener('click', () => registraPresenza('ingresso'));
+        btnClockOut.addEventListener('click', () => registraPresenza('uscita'));
+
+        // ==========================================
+        //         GESTIONE AMMINISTRATORE
+        // ==========================================
+        btnAdminLoad.addEventListener('click', async () => {
+            const targetCode = adminTargetCode.value.trim();
+            if (!targetCode) {
+                alert("Inserisci un codice valido.");
+                return;
+            }
+
+            adminActiveTargetCode = targetCode;
+            adminFormContainer.classList.remove('opacity-50', 'pointer-events-none');
+
+            try {
+                const docRef = doc(db, FIRESTORE_COLLECTION, targetCode);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    adminFormTitle.innerHTML = `⚙️ Modifica operatore esistente: <span class="text-teal-700 font-mono">${targetCode}</span>`;
+                    admNome.value = data.fullname || "";
+                    admFerie.value = data.ferie !== undefined ? data.ferie : 0;
+                    admGrado.value = data.grado || "OSS";
+                    admMansione.value = data.mansione || "";
+                    admSalario.value = data.salario || 0;
+                } else {
+                    adminFormTitle.innerHTML = `🆕 Inizializzazione nuovi campi per codice: <span class="text-blue-600 font-mono">${targetCode}</span>`;
+                    admNome.value = "";
+                    admFerie.value = 26; 
+                    admGrado.value = "OSS";
+                    admMansione.value = "";
+                    admSalario.value = 1500;
+                }
+            } catch (e) {
+                alert("Impossibile connettersi al documento dell'operatore.");
+            }
+        });
+
+        async function salvaDatiAdmin(tipoAzione, modificaSalarioPercentuale = 0) {
+            if (!adminActiveTargetCode) return;
+
+            let nuovoSalario = parseFloat(admSalario.value) || 0;
+            if (modificaSalarioPercentuale !== 0) {
+                nuovoSalario = Math.round(nuovoSalario * (1 + modificaSalarioPercentuale));
+                admSalario.value = nuovoSalario; 
+            }
+
+            const oraModifica = new Date().toLocaleString('it-IT');
+            const docRef = doc(db, FIRESTORE_COLLECTION, adminActiveTargetCode);
+
+            const logCronologia = {
+                tipo: tipoAzione,
+                data: oraModifica,
+                grado: admGrado.value,
+                mansione: admMansione.value,
+                salario: nuovoSalario
+            };
+
+            try {
+                await setDoc(docRef, {
+                    fullname: admNome.value,
+                    ferie: parseInt(admFerie.value) || 0,
+                    grado: admGrado.value,
+                    mansione: admMansione.value,
+                    salario: nuovoSalario,
+                    cronologiaMansioni: arrayUnion(logCronologia)
+                }, { merge: true });
+
+                alert(`Operazione [${tipoAzione.toUpperCase()}] salvata correttamente nel database.`);
+                eseguiResetSchermata();
+
+            } catch (error) {
+                console.error(error);
+                alert("Errore durante il salvataggio dei dati.");
+            }
+        }
+
+        btnActionSave.addEventListener('click', () => salvaDatiAdmin('Modifica Anagrafica', 0));
+        btnActionPromote.addEventListener('click', () => salvaDatiAdmin('Promozione (+15%)', 0.15));
+        btnActionDemote.addEventListener('click', () => salvaDatiAdmin('Degradazione (-10%)', -0.10));
+
+    </script>
+</body>
+</html>
