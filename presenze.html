@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Terminale Presenze - Medical Portal</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Presenze Med">
+    <link rel="apple-touch-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Disabilita la selezione del testo e i menu contestuali per facilitare l'Accesso Guidato */
+        body {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans flex flex-col justify-between antialiased">
+
+    <header class="bg-white border-b border-slate-200 p-4 shadow-sm">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="https://webapp.drgiuseppemusumeci.com/favicon.ico" alt="Logo" class="w-9 h-9 object-contain">
+                <div>
+                    <h1 class="text-md font-bold text-teal-800 tracking-wide uppercase">Rilevazione Presenze</h1>
+                    <p class="text-[11px] text-slate-500 font-medium">Divisione Sanitaria & Personale</p>
+                </div>
+            </div>
+            <div id="live-status" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                ● SISTEMA ATTIVO
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md w-full mx-auto p-6 flex-1 flex flex-col justify-center">
+        
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 space-y-8">
+            
+            <div id="step-identificazione" class="space-y-6">
+                <div class="text-center space-y-1">
+                    <div class="inline-flex p-3 bg-teal-50 rounded-full text-teal-600 mb-2">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900">Autenticazione Operatore</h2>
+                    <p class="text-xs text-slate-500">Avvicinare il badge al lettore o inserire il codice</p>
+                </div>
+                
+                <div>
+                    <input type="text" id="codice-badge" placeholder="Inserire ID Dipendente" autofocus
+                           class="w-full text-center px-4 py-4 bg-slate-50 border border-slate-300 rounded-xl text-2xl font-mono tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:bg-white transition-all">
+                </div>
+                
+                <button id="btn-valida-codice" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-4 rounded-xl text-md transition shadow-md active:scale-[0.99]">
+                    CONFERMA IDENTITÀ
+                </button>
+            </div>
+
+            <div id="step-selezione" class="hidden space-y-6">
+                <div class="text-center border-b border-slate-100 pb-4">
+                    <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold uppercase">Personale Medico</span>
+                    <h3 id="nome-operatore-display" class="text-xl font-bold text-slate-900 mt-1">...</h3>
+                    <p class="text-xs text-slate-400 font-mono mt-0.5">ID: <span id="id-operatore-display"></span></p>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <button id="btn-azione-ingresso" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-5 rounded-xl flex items-center justify-between transition shadow-md active:scale-[0.99]">
+                        <span class="flex items-center gap-3 font-bold text-lg tracking-wide">
+                            <span>🟢</span> REGISTRA INGRESSO
+                        </span>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    </button>
+                    
+                    <button id="btn-azione-uscita" class="w-full bg-rose-600 hover:bg-rose-700 text-white p-5 rounded-xl flex items-center justify-between transition shadow-md active:scale-[0.99]">
+                        <span class="flex items-center gap-3 font-bold text-lg tracking-wide">
+                            <span>🔴</span> REGISTRA USCITA
+                        </span>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </button>
+                </div>
+                
+                <button id="btn-annulla-azione" class="w-full text-xs text-slate-400 hover:text-slate-600 py-2 font-medium transition tracking-wide uppercase">
+                    Annulla Operazione
+                </button>
+            </div>
+
+            <div id="step-feedback" class="hidden text-center space-y-5 py-2">
+                <div id="feedback-icon" class="text-5xl">⏱️</div>
+                <h3 id="feedback-titolo" class="text-xl font-bold text-slate-900">Elaborazione</h3>
+                <p id="feedback-messaggio" class="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed"></p>
+
+                <div id="box-resoconto-ore" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200 text-left space-y-2.5 text-xs">
+                    <div class="flex justify-between border-b border-slate-200/60 pb-2">
+                        <span class="text-slate-500 font-medium">Turno Odierno Compiuto:</span>
+                        <span id="ore-sessione-attuale" class="text-slate-900 font-bold font-mono text-sm">00h 00m 00s</span>
+                    </div>
+                    <div class="flex justify-between pt-0.5">
+                        <span class="text-slate-500 font-medium">Monte Ore Settimanale:</span>
+                        <span id="ore-settimanali" class="text-teal-700 font-bold font-mono text-sm">00h 00m 00s</span>
+                    </div>
+                </div>
+
+                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-6">
+                    <div id="feedback-progress-bar" class="bg-teal-600 h-full w-0 transition-all duration-1000 ease-linear"></div>
+                </div>
+                <p id="countdown-testo" class="text-[10px] text-slate-400 tracking-wide font-medium uppercase">Chiusura automatica della sessione display...</p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="p-4 text-center text-[10px] text-slate-400 font-medium tracking-wider uppercase border-t border-slate-200 bg-white">
+        Ospedale SafeGate Terminal • Connessione Criptata cloud
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYcwhZdpOkNOJwt_2oIBGIDED4y7fVVm0",
+            authDomain: "staff-operatori-mg.firebaseapp.com",
+            projectId: "staff-operatori-mg",
+            storageBucket: "staff-operatori-mg.firebasestorage.app",
+            messagingSenderId: "797244866930",
+            appId: "1:797244866930:web:b93ca19a318711f8b89deb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const FIRESTORE_COLLECTION = "operatori";
+
+        // Elementi DOM
+        const liveStatus = document.getElementById('live-status');
+        const stepIdentificazione = document.getElementById('step-identificazione');
+        const stepSelezione = document.getElementById('step-selezione');
+        const stepFeedback = document.getElementById('step-feedback');
+
+        const codiceBadge = document.getElementById('codice-badge');
+        const btnValidaCodice = document.getElementById('btn-valida-codice');
+        
+        const nomeOperatoreDisplay = document.getElementById('nome-operatore-display');
+        const idOperatoreDisplay = document.getElementById('id-operatore-display');
+        const btnAzioneIngresso = document.getElementById('btn-azione-ingresso');
+        const btnAzioneUscita = document.getElementById('btn-azione-uscita');
+        const btnAnnullaAzione = document.getElementById('btn-annulla-azione');
+
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackTitolo = document.getElementById('feedback-titolo');
+        const feedbackMessaggio = document.getElementById('feedback-messaggio');
+        const boxResocontoOre = document.getElementById('box-resoconto-ore');
+        const oreSessioneAttuale = document.getElementById('ore-sessione-attuale');
+        const oreSettimanali = document.getElementById('ore-settimanali');
+        const feedbackProgressBar = document.getElementById('feedback-progress-bar');
+
+        let activeEmployeeCode = null;
+        let activeEmployeeData = null;
+        let timerResetId = null;
+
+        // Mantiene il focus sull'input per gli scanner automatici
+        window.addEventListener('DOMContentLoaded', () => codiceBadge.focus());
+
+        btnValidaCodice.addEventListener('click', validazioneBadge);
+        codiceBadge.addEventListener('keypress', (e) => { if(e.key === 'Enter') validazioneBadge(); });
+
+        async function validazioneBadge() {
+            const codice = codiceBadge.value.trim();
+            if (!codice) return;
+
+            setTerminalStatus("RICERCA...", "bg-amber-50 text-amber-700 border-amber-200");
+
+            try {
+                const docRef = doc(db, FIRESTORE_COLLECTION, codice);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    activeEmployeeCode = codice;
+                    activeEmployeeData = docSnap.data();
+
+                    nomeOperatoreDisplay.textContent = activeEmployeeData.fullname || "Operatore N/D";
+                    idOperatoreDisplay.textContent = codice;
+
+                    stepIdentificazione.classList.add('hidden');
+                    stepSelezione.classList.remove('hidden');
+                    setTerminalStatus("SELEZIONE AZIONE", "bg-blue-50 text-blue-700 border-blue-200");
+                } else {
+                    mostraSchermataFeedback("❌", "Codice Errato", "Nessun fascicolo sanitario o dipendente associato a questo codice identificativo.", 5);
+                }
+            } catch (error) {
+                console.error(error);
+                setTerminalStatus("ERRORE DI RETE", "bg-rose-50 text-rose-700 border-rose-200");
+                alert("Errore di connessione. Verificare la copertura di rete della stazione e riprovare.");
+                resetTerminaleImmediato();
+            }
+        }
+
+        btnAnnullaAzione.addEventListener('click', resetTerminaleImmediato);
+        btnAzioneIngresso.addEventListener('click', () => eseguiTimbratura('ingresso'));
+        btnAzioneUscita.addEventListener('click', () => eseguiTimbratura('uscita'));
+
+        async function eseguiTimbratura(tipo) {
+            if (!activeEmployeeCode) return;
+            
+            setTerminalStatus("SINCRO IN CORSO", "bg-yellow-50 text-yellow-700 border-yellow-200");
+            const oraEsattaStringa = new Date().toLocaleString('it-IT');
+            const docRef = doc(db, FIRESTORE_COLLECTION, activeEmployeeCode);
+
+            let haAnomalia = false;
+            let messaggioAnomalia = "";
+            const logs = activeEmployeeData.ingressiUscite || [];
+
+            if (logs.length > 0) {
+                const ultimoLog = [...logs].sort((a,b) => convertiStringaInData(a.timestamp) - convertiStringaInData(b.timestamp)).pop();
+                
+                if (tipo === 'ingresso' && ultimoLog.tipo === 'ingresso') {
+                    haAnomalia = true;
+                    messaggioAnomalia = "Nota: Rilevato ingresso consecutivo senza previa uscita. Il sistema ha archiviato la timbratura sovrascrivendo l'intervallo attivo.";
+                } else if (tipo === 'uscita' && ultimoLog.tipo === 'uscita') {
+                    haAnomalia = true;
+                    messaggioAnomalia = "Nota: Rilevata uscita consecutiva. Il dato è registrato correttamente ai fini dei log ma non aggiungerà ore di servizio.";
+                }
+            } else if (tipo === 'uscita' && logs.length === 0) {
+                haAnomalia = true;
+                messaggioAnomalia = "Nota: Rilevata timbratura di uscita senza un ingresso iniziale salvato nel database.";
+            }
+
+            try {
+                // Scrittura dei dati invariabile (senza bloccare)
+                await updateDoc(docRef, {
+                    ingressiUscite: arrayUnion({
+                        tipo: tipo,
+                        timestamp: oraEsattaStringa
+                    })
+                });
+
+                const docSnapAggiornato = await getDoc(docRef);
+                const datiAggiornati = docSnapAggiornato.data();
+
+                if (tipo === 'ingresso') {
+                    const icona = haAnomalia ? "⚠️" : "✔️";
+                    const titolo = haAnomalia ? "Ingresso Salvato (Avviso)" : "Ingresso Confermato";
+                    const msg = haAnomalia ? messaggioAnomalia : `Accesso registrato con successo alle ore ${oraEsattaStringa}. Buon turno di lavoro.`;
+                    
+                    mostraSchermataFeedback(icona, titolo, msg, 5);
+                } else {
+                    // Flusso di uscita con doppio timer (3s calcolo + 5s visualizzazione)
+                    stepSelezione.classList.add('hidden');
+                    stepFeedback.classList.remove('hidden');
+                    boxResocontoOre.classList.add('hidden');
+                    
+                    feedbackIcon.textContent = "⚖️";
+                    feedbackTitolo.textContent = "Elaborazione Dati...";
+                    feedbackMessaggio.textContent = "Calcolo del riepilogo orario e delle competenze settimanali in corso...";
+                    
+                    avviaAnimazioneBarra(3);
+
+                    setTimeout(() => {
+                        const calcoli = calcolaMetricaTempi(datiAggiornati.ingressiUscite);
+                        
+                        feedbackIcon.textContent = haAnomalia ? "⚠️" : "🩺";
+                        feedbackTitolo.textContent = haAnomalia ? "Uscita con Nota" : "Uscita Confermata";
+                        feedbackMessaggio.textContent = haAnomalia ? messaggioAnomalia : `Turno terminato. Rilevazione d'uscita eseguita il ${oraEsattaStringa}.`;
+                        
+                        oreSessioneAttuale.textContent = calcoli.odierna;
+                        oreSettimanali.textContent = calcoli.settimanale;
+                        boxResocontoOre.classList.remove('hidden');
+
+                        avviaAnimazioneBarra(5);
+                        timerResetId = setTimeout(resetTerminaleImmediato, 5000);
+
+                    }, 3000);
+                }
+
+            } catch (err) {
+                console.error(err);
+                setTerminalStatus("ERRORE SINCRO", "bg-rose-50 text-rose-700 border-rose-200");
+                alert("Errore di scrittura sul server cloud. Operazione non riuscita, riprovare.");
+                resetTerminaleImmediato();
+            }
+        }
+
+        function calcolaMetricaTempi(ingressiUscite) {
+            let msSettimanali = 0;
+            let msOdierni = 0;
+
+            if (!ingressiUscite || ingressiUscite.length === 0) {
+                return { odierna: "00h 00m 00s", settimanale: "00h 00m 00s" };
+            }
+
+            const logs = [...ingressiUscite].sort((a, b) => convertiStringaInData(a.timestamp) - convertiStringaInData(b.timestamp));
+            let ultimoIngressoMs = null;
+            const adesso = new Date();
+
+            logs.forEach(log => {
+                const dataLog = convertiStringaInData(log.timestamp);
+                if (!dataLog) return;
+                const logMs = dataLog.getTime();
+
+                if (log.tipo === 'ingresso') {
+                    ultimoIngressoMs = logMs;
+                } else if (log.tipo === 'uscita') {
+                    if (ultimoIngressoMs !== null) {
+                        const durata = logMs - ultimoIngressoMs;
+                        
+                        if ((adesso.getTime() - logMs) <= (7 * 24 * 60 * 60 * 1000)) {
+                            msSettimanali += durata;
+                        }
+                        if (durata > 0 && dataLog.toDateString() === adesso.toDateString()) {
+                            msOdierni = durata;
+                        }
+                        ultimoIngressoMs = null;
+                    }
+                }
+            });
+
+            return {
+                odierna: formattaMilliSecondi(msOdierni),
+                settimanale: formattaMilliSecondi(msSettimanali)
+            };
+        }
+
+        function mostraSchermataFeedback(icona, titolo, messaggio, secondiAttesa) {
+            stepIdentificazione.classList.add('hidden');
+            stepSelezione.classList.add('hidden');
+            boxResocontoOre.classList.add('hidden');
+            stepFeedback.classList.remove('hidden');
+
+            feedbackIcon.textContent = icona;
+            feedbackTitolo.textContent = titolo;
+            feedbackMessaggio.textContent = messaggio;
+
+            avviaAnimazioneBarra(secondiAttesa);
+            timerResetId = setTimeout(resetTerminaleImmediato, secondiAttesa * 1000);
+        }
+
+        function avviaAnimazioneBarra(secondi) {
+            feedbackProgressBar.style.transition = 'none';
+            feedbackProgressBar.style.width = '100%';
+            feedbackProgressBar.offsetHeight; 
+            feedbackProgressBar.style.transition = `width ${secondi}s linear`;
+            feedbackProgressBar.style.width = '0%';
+        }
+
+        function resetTerminaleImmediato() {
+            if (timerResetId) clearTimeout(timerResetId);
+            activeEmployeeCode = null;
+            activeEmployeeData = null;
+            codiceBadge.value = "";
+            
+            stepSelezione.classList.add('hidden');
+            stepFeedback.classList.add('hidden');
+            boxResocontoOre.classList.add('hidden');
+            stepIdentificazione.classList.remove('hidden');
+
+            setTerminalStatus("● SISTEMA ATTIVO", "bg-teal-50 text-teal-700 border-teal-200");
+            codiceBadge.focus();
+        }
+
+        function setTerminalStatus(testo, classiColori) {
+            liveStatus.textContent = testo;
+            liveStatus.className = `text-xs font-semibold px-3 py-1.5 rounded-full ${classiColori}`;
+        }
+
+        function formattaMilliSecondi(ms) {
+            let secondiTotali = Math.floor(ms / 1000);
+            let ore = Math.floor(secondiTotali / 3600);
+            secondiTotali %= 3600;
+            let minuti = Math.floor(secondiTotali / 60);
+            let secondi = secondiTotali % 60;
+            return `${String(ore).padStart(2,'0')}h ${String(minuti).padStart(2,'0')}m ${String(secondi).padStart(2,'0')}s`;
+        }
+
+        function convertiStringaInData(str) {
+            try {
+                const parti = str.split(/[\s,]+/);
+                const dataParti = parti[0].split('/');
+                const oraParti = parti[1].split(':');
+                return new Date(
+                    parseInt(dataParti[2], 10),
+                    parseInt(dataParti[1], 10) - 1,
+                    parseInt(dataParti[0], 10),
+                    parseInt(oraParti[0], 10),
+                    parseInt(oraParti[1], 10),
+                    parseInt(oraParti[2], 10)
+                );
+            } catch (e) {
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>
