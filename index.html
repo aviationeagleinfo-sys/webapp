@@ -9,6 +9,11 @@
   <link rel="icon" type="image/png" sizes="192x192" href="https://webapp.drgiuseppemusumeci.com/nosfondologo3.png">
   <meta name="theme-color" content="#0d2c54">
 
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dr. Musumeci">
+  <link rel="apple-touch-icon" href="https://webapp.drgiuseppemusumeci.com/nosfondologo4.png">
+
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -415,7 +420,7 @@
         });
         newsList.innerHTML = html;
       }, (error) => {
-        console.warn("Errore ordinamento (indice mancante?), avvio fallback senza filtri:", error);
+        console.warn("Errore ordinamento, avvio fallback senza filtri:", error);
         loadNewsFallback();
       });
 
