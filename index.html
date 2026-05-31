@@ -20,6 +20,66 @@
   </script>
 
   <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f7f6;
+      color: #333;
+      padding: 20px;
+    }
+
+    /* Stile per i moduli dell'App con effetto Glassmorphism sfumato */
+    .app-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+
+    .native-login input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .btn-primary { background-color: #0056b3; color: white; }
+    .btn-google { background-color: #db4437; color: white; }
+    .btn-facebook { background-color: #4267B2; color: white; }
+    .btn-signout { background-color: #e0e0e0; color: #333; }
+
+    .social-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .news-item {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 15px 0;
+    }
+    .news-item:last-child { border-bottom: none; }
+    .news-item h4 { margin: 0 0 8px 0; color: #0056b3; }
+    .news-item p { margin: 0 0 8px 0; font-size: 14px; line-height: 1.4; }
+    .news-item small { color: #888; }
+
     /* Popup di Installazione Stile Glassmorphism */
     #pwa-install-banner {
       display: none;
@@ -35,9 +95,10 @@
       padding: 15px 25px;
       border-radius: 16px;
       z-index: 9999;
-      font-family: sans-serif;
       align-items: center;
       gap: 15px;
+      width: 90%;
+      max-width: 450px;
     }
     #pwa-install-banner img {
       width: 40px;
@@ -46,66 +107,174 @@
     }
     #pwa-install-banner .text {
       color: #333;
-      font-size: 14px;
+      font-size: 13px;
     }
     #pwa-install-banner button {
       border: none;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
     }
-    #pwa-install-banner .btn-install {
-      background-color: #0056b3;
-      color: white;
-    }
-    #pwa-install-banner .btn-close {
-      background-color: transparent;
-      color: #666;
-    }
+    #pwa-install-banner .btn-install { background-color: #0056b3; color: white; }
+    #pwa-install-banner .btn-close { background-color: transparent; color: #666; }
   </style>
 </head>
 <body>
 
-  <h1>Sito Web Dr. Giuseppe Musumeci</h1>
+  <h1>Area Sanitaria — Dr. Giuseppe Musumeci</h1>
+
+  <div class="app-card" id="auth-container">
+    <h3>Accesso Piattaforma</h3>
+    
+    <div id="user-info" style="display: none;">
+      <p>Account attivo: <strong id="user-name"></strong></p>
+      <button class="btn btn-signout" id="btnSignOut">Disconnetti</button>
+    </div>
+    
+    <div id="auth-forms">
+      <div class="native-login">
+        <input type="email" id="loginEmail" placeholder="Indirizzo Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button class="btn btn-primary" id="btnEmailLogin">Accedi</button>
+      </div>
+      <div class="social-grid">
+        <button class="btn btn-google" id="btnGoogleLogin">Google</button>
+        <button class="btn btn-facebook" id="btnFacebookLogin">Facebook</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-card">
+    <h3>Ultime Notizie & Comunicazioni</h3>
+    <div id="news-list">Verifica degli aggiornamenti in corso...</div>
+  </div>
 
   <div id="pwa-install-banner">
     <img src="https://webapp.drgiuseppemusumeci.com/favicon.ico" alt="Logo">
-    <div class="text">Installa l'app del Dr. Musumeci sul tuo dispositivo per un accesso rapido anche offline.</div>
+    <div class="text">Installa l'app del Dr. Musumeci per ricevere le notifiche e usarla offline.</div>
     <button class="btn-install" id="btnPwaInstall">Installa</button>
-    <button class="btn-close" id="btnPwaClose">No, grazie</button>
+    <button class="btn-close" id="btnPwaClose">Annulla</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { initializeFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider, 
+      FacebookAuthProvider, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      initializeFirestore, 
+      enableIndexedDbPersistence, 
+      collection, 
+      onSnapshot, 
+      query, 
+      orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Inizializzazione Firebase 'staff-operatori-mg'
+    // Nuova configurazione Firebase ufficiale associata all'app 'giuseppe-4c318'
     const firebaseConfig = {
-      apiKey: "AIzaSyDYcwhZdpOkNOJwt_2oIBGIDED4y7fVVm0",
-      authDomain: "staff-operatori-mg.firebaseapp.com",
-      projectId: "staff-operatori-mg",
-      storageBucket: "staff-operatori-mg.firebasestorage.app",
-      messagingSenderId: "797244866930",
-      appId: "1:797244866930:web:c15c3810bf4a6ebeb89deb"
+      apiKey: "AIzaSyCt6Ti-xk-_7j-CI_MLILkjj6fJem9VPOY",
+      authDomain: "giuseppe-4c318.firebaseapp.com",
+      databaseURL: "https://giuseppe-4c318-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "giuseppe-4c318",
+      storageBucket: "giuseppe-4c318.firebasestorage.app",
+      messagingSenderId: "658885311131",
+      appId: "1:658885311131:web:9bb26a19cec41dd331e43e",
+      measurementId: "G-T740SVWJ06"
     };
 
+    // Inizializzazione moduli e analisi
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
     const db = initializeFirestore(app, { localCache: true });
 
-    // Abilita la persistenza dei dati offline
+    // Attivazione cache IndexedDB per l'archiviazione dati locale in assenza di rete
     enableIndexedDbPersistence(db).catch((err) => {
-      console.warn("Stato persistenza offline:", err.code);
+      console.warn("Stato persistenza offline database:", err.code);
     });
 
-    // Gestione del Popup di Installazione
+    // --- SISTEMA DI AUTENTICAZIONE UTENTE ---
+    const googleProvider = new GoogleAuthProvider();
+    const facebookProvider = new FacebookAuthProvider();
+
+    const authForms = document.getElementById('auth-forms');
+    const userInfo = document.getElementById('user-info');
+    const userName = document.getElementById('user-name');
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        authForms.style.display = 'none';
+        userInfo.style.display = 'block';
+        userName.textContent = user.displayName || user.email;
+      } else {
+        authForms.style.display = 'block';
+        userInfo.style.display = 'none';
+      }
+    });
+
+    document.getElementById('btnGoogleLogin').addEventListener('click', () => {
+      signInWithPopup(auth, googleProvider).catch(err => console.error("Autenticazione Google fallita:", err));
+    });
+
+    document.getElementById('btnFacebookLogin').addEventListener('click', () => {
+      signInWithPopup(auth, facebookProvider).catch(err => console.error("Autenticazione Facebook fallita:", err));
+    });
+
+    document.getElementById('btnEmailLogin').addEventListener('click', () => {
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPassword').value;
+      if(email && pass) {
+        signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Errore di accesso nativo: " + err.message));
+      }
+    });
+
+    document.getElementById('btnSignOut').addEventListener('click', () => {
+      signOut(auth);
+    });
+
+    // --- PIPELINE DI SINCRONIZZAZIONE NEWS (Firestore Real-time) ---
+    const newsList = document.getElementById('news-list');
+    const newsQuery = query(collection(db, "news"), orderBy("date", "desc"));
+
+    onSnapshot(newsQuery, (snapshot) => {
+      if (snapshot.empty) {
+        newsList.innerHTML = "<p>Nessun aggiornamento o comunicazione inserita.</p>";
+        return;
+      }
+
+      let html = "";
+      snapshot.forEach((doc) => {
+        const newsData = doc.data();
+        const formattedDate = newsData.date ? new Date(newsData.date.seconds * 1000).toLocaleDateString('it-IT') : 'Data non specificata';
+        html += `
+          <div class="news-item">
+            <h4>${newsData.title || 'Comunicazione'}</h4>
+            <p>${newsData.content || ''}</p>
+            <small>Pubblicato il: ${formattedDate}</small>
+          </div>
+        `;
+      });
+      newsList.innerHTML = html;
+    }, (error) => {
+      console.error("Errore flusso Firestore:", error);
+      newsList.innerHTML = "<p>Servizio temporaneamente non disponibile offline.</p>";
+    });
+
+    // --- LOGICA DI GESTIONE POPUP INSTALLAZIONE PWA ---
     let deferredPrompt;
     const installBanner = document.getElementById('pwa-install-banner');
     const btnInstall = document.getElementById('btnPwaInstall');
     const btnClose = document.getElementById('btnPwaClose');
 
     window.addEventListener('beforeinstallprompt', (e) => {
-      // Se l'app è già avviata standalone, esce
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
       if (isStandalone) return;
 
@@ -122,7 +291,7 @@
         if (deferredPrompt) {
           deferredPrompt.prompt();
           const { outcome } = await deferredPrompt.userChoice;
-          console.log(`Risposta installazione: ${outcome}`);
+          console.log(`Riscontro utente installazione: ${outcome}`);
           deferredPrompt = null;
           installBanner.style.display = 'none';
         }
@@ -137,15 +306,15 @@
 
     window.addEventListener('appinstalled', () => {
       if (installBanner) installBanner.style.display = 'none';
-      console.log('Applicazione installata con successo sulla home.');
+      console.log('Installazione completata con successo.');
     });
 
-    // Registrazione del Service Worker principale
+    // Registrazione dell'ambiente Service Worker principale
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('Service Worker registrato su:', reg.scope))
-          .catch(err => console.error('Errore Service Worker:', err));
+          .then(reg => console.log('Service Worker agganciato allo scope:', reg.scope))
+          .catch(err => console.error('Fallimento Service Worker:', err));
       });
     }
 
