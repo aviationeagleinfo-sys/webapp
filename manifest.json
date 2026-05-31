@@ -1,0 +1,29 @@
+{
+  "name": "Dr. Giuseppe Musumeci",
+  "short_name": "Dr. Musumeci",
+  "description": "Applicazione ufficiale del Dr. Giuseppe Musumeci",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0056b3",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://webapp.drgiuseppemusumeci.com/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "https://webapp.drgiuseppemusumeci.com/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://webapp.drgiuseppemusumeci.com/favicon.ico",
+      "sizes": "512x512",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    }
+  ]
+}
