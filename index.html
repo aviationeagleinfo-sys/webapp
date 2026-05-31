@@ -379,30 +379,80 @@
 
     document.getElementById('btnSignOut').addEventListener('click', () => signOut(auth));
 
+    // ==========================================
+    // SISTEMA DI CARICAMENTO NEWS PROTETTO
+    // ==========================================
     const newsList = document.getElementById('news-list');
-    const newsQuery = query(collection(db, "news"), orderBy("date", "desc"));
 
-    onSnapshot(newsQuery, (snapshot) => {
-      if (snapshot.empty) {
-        newsList.innerHTML = "<p style='color:var(--text-light); font-size:14px; text-align:center;'>Nessun aggiornamento clinico disponibile.</p>";
-        return;
-      }
-      let html = "";
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const dateFormatted = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString('it-IT') : 'Recente';
-        html += `
-          <div class="news-item">
-            <h4>${data.title || 'Avviso'}</h4>
-            <p>${data.content || ''}</p>
-            <small>${dateFormatted}</small>
-          </div>
-        `;
+    try {
+      const newsQuery = query(collection(db, "news"), orderBy("date", "desc"));
+
+      onSnapshot(newsQuery, (snapshot) => {
+        if (snapshot.empty) {
+          newsList.innerHTML = "<p style='color:var(--text-light); font-size:14px; text-align:center;'>Nessun aggiornamento clinico disponibile.</p>";
+          return;
+        }
+        let html = "";
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const title = data.title || 'Avviso Clinico';
+          const content = data.content || '';
+          
+          let dateFormatted = 'Recente';
+          if (data.date && typeof data.date.toDate === 'function') {
+            dateFormatted = data.date.toDate().toLocaleDateString('it-IT');
+          } else if (data.date && data.date.seconds) {
+            dateFormatted = new Date(data.date.seconds * 1000).toLocaleDateString('it-IT');
+          }
+
+          html += `
+            <div class="news-item">
+              <h4>${title}</h4>
+              <p>${content}</p>
+              <small>${dateFormatted}</small>
+            </div>
+          `;
+        });
+        newsList.innerHTML = html;
+      }, (error) => {
+        console.warn("Errore ordinamento (indice mancante?), avvio fallback senza filtri:", error);
+        loadNewsFallback();
       });
-      newsList.innerHTML = html;
-    }, (err) => {
-      newsList.innerHTML = "<p style='color:var(--text-light);'>Contenuto non disponibile offline.</p>";
-    });
+
+    } catch (err) {
+      console.error("Errore critico news:", err);
+      newsList.innerHTML = "<p style='color:var(--text-light);'>Impossibile caricare le comunicazioni.</p>";
+    }
+
+    function loadNewsFallback() {
+      try {
+        const fallbackQuery = query(collection(db, "news"));
+        onSnapshot(fallbackQuery, (snapshot) => {
+          if (snapshot.empty) {
+            newsList.innerHTML = "<p style='color:var(--text-light); text-align:center;'>Nessun avviso presente nel database.</p>";
+            return;
+          }
+          let html = "";
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            html += `
+              <div class="news-item">
+                <h4>${data.title || 'Avviso'}</h4>
+                <p>${data.content || ''}</p>
+                <small>Recente</small>
+              </div>
+            `;
+          });
+          newsList.innerHTML = html;
+        }, (err) => {
+          console.error("Fallito anche il fallback:", err);
+          newsList.innerHTML = "<p style='color:var(--text-light);'>Errore di sincronizzazione dei dati.</p>";
+        });
+      } catch(e) {
+        console.error(e);
+      }
+    }
+    // ==========================================
 
     let deferredPrompt;
     const installBanner = document.getElementById('pwa-install-banner');
@@ -428,7 +478,6 @@
     }
     if (btnClose) btnClose.addEventListener('click', () => installBanner.style.display = 'none');
 
-    // Percorso relativo per l'aggancio corretto del Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('service-worker.js').catch(err => console.error(err));
