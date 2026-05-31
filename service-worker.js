@@ -1,3 +1,16 @@
+// PRIMA RIGA IN ASSOLUTO DEL FILE:
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
+
+// Sotto continua il tuo codice precedente per la cache offline...
+const CACHE_NAME = 'dr-musumeci-v1';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  'https://webapp.drgiuseppemusumeci.com/favicon.ico'
+];
+
+// ... resto del codice del service worker ...
 const CACHE_NAME = 'dr-musumeci-v1';
 // Elenca qui i file principali che vuoi siano disponibili offline
 const ASSETS_TO_CACHE = [
