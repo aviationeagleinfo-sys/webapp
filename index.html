@@ -121,6 +121,45 @@
       console.log('PWA installata con successo dal dispositivo.');
       installBanner.style.display = 'none';
     });
+    <script type="module">
+  // 1. Importazione dei moduli necessari tramite CDN ufficiale di Firebase v10
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { initializeFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // 2. La tua configurazione ufficiale Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDYcwhZdpOkNOJwt_2oIBGIDED4y7fVVm0",
+    authDomain: "staff-operatori-mg.firebaseapp.com",
+    projectId: "staff-operatori-mg",
+    storageBucket: "staff-operatori-mg.firebasestorage.app",
+    messagingSenderId: "797244866930",
+    appId: "1:797244866930:web:c15c3810bf4a6ebeb89deb"
+  };
+
+  // 3. Inizializzazione dell'App
+  const app = initializeApp(firebaseConfig);
+
+  // 4. Inizializzazione di Firestore con cache locale attiva
+  const db = initializeFirestore(app, {
+    localCache: true
+  });
+
+  // 5. Attivazione della persistenza IndexedDB per l'uso Offline totale
+  enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code == 'failed-precondition') {
+      // Questo accade se l'utente ha aperto il software in più schede del browser contemporaneamente
+      console.warn("Persistenza offline non attivata: ci sono più schede aperte del sito.");
+    } else if (err.code == 'unimplemented') {
+      // Il browser corrente (molto vecchio o in modalità incognita restrittiva) non supporta IndexedDB
+      console.error("Il browser corrente non supporta la persistenza offline.");
+    }
+  });
+
+  console.log("Firebase collegato al database 'staff-operatori-mg' e pronto offline!");
+  
+  // Esporta 'db' se hai bisogno di usarlo in altri moduli JS del tuo software interno
+  export { db };
+</script>
   </script>
 </body>
 </html>
