@@ -2,12 +2,12 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dr. Giuseppe Musumeci</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dr. Giuseppe Musumeci — Healthcare Hub</title>
   
-  <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/x-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
-  <meta name="theme-color" content="#0056b3">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://webapp.drgiuseppemusumeci.com/nosfondologo3.png">
+  <meta name="theme-color" content="#0d2c54">
 
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
@@ -20,165 +20,278 @@
   </script>
 
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f4f7f6;
-      color: #333;
-      padding: 20px;
+    :root {
+      --primary: #0a4275;
+      --primary-dark: #0d2c54;
+      --accent: #00b4d8;
+      --bg: #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.8);
+      --text: #1e293b;
+      --text-light: #64748b;
+      --glass-border: rgba(255, 255, 255, 0.6);
     }
 
-    /* Stile per i moduli dell'App con effetto Glassmorphism sfumato */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0 0 80px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: white;
+      text-align: center;
+      padding: 25px 0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border-bottom-left-radius: 24px;
+      border-bottom-right-radius: 24px;
+      margin-bottom: 25px;
+    }
+
+    header h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: 0.5px; }
+    header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.8; }
+
+    main { width: 90%; max-width: 480px; }
+
     .app-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.05);
-      padding: 20px;
-      border-radius: 16px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.04);
+      padding: 24px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      transition: transform 0.2s ease;
+    }
+
+    .app-section { display: none; }
+    .app-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(0, 0, 0, 0.04);
+      padding: 4px;
+      border-radius: 10px;
       margin-bottom: 20px;
     }
 
-    .native-login input {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
+    .auth-tab {
+      background: transparent;
+      border: none;
+      padding: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
       border-radius: 8px;
-      box-sizing: border-box;
+      transition: all 0.2s ease;
     }
+
+    .auth-tab.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+    .form-group { display: none; }
+    .form-group.active { display: block; }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(10, 66, 117, 0.15); }
 
     .btn {
-      padding: 10px 16px;
+      padding: 12px 16px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 14px;
       width: 100%;
-      margin-top: 5px;
+      margin-top: 4px;
+      transition: background-color 0.2s ease, transform 0.1s ease;
     }
 
-    .btn-primary { background-color: #0056b3; color: white; }
-    .btn-google { background-color: #db4437; color: white; }
-    .btn-facebook { background-color: #4267B2; color: white; }
-    .btn-signout { background-color: #e0e0e0; color: #333; }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background-color: var(--primary); color: white; }
+    .btn-primary:hover { background-color: var(--primary-dark); }
+    .btn-google { background-color: #fff; color: #444; border: 1px solid rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-facebook { background-color: #1877f2; color: white; }
+    .btn-signout { background-color: #f1f5f9; color: var(--text); border: 1px solid #e2e8f0; }
 
-    .social-grid {
+    .divider { text-align: center; margin: 16px 0; font-size: 12px; color: var(--text-light); position: relative; }
+    .social-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+    .news-item { border-bottom: 1px solid rgba(0, 0, 0, 0.05); padding: 16px 0; }
+    .news-item:last-child { border-bottom: none; }
+    .news-item h4 { margin: 0 0 6px 0; font-size: 16px; color: var(--primary); font-weight: 600; }
+    .news-item p { margin: 0 0 8px 0; font-size: 14px; line-height: 1.5; color: #334155; }
+    .news-item small { color: var(--text-light); font-size: 11px; font-weight: 500; }
+
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
+      padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)) 0;
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.04);
+      z-index: 999;
     }
 
-    .news-item {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      padding: 15px 0;
+    .nav-item {
+      background: transparent;
+      border: none;
+      color: var(--text-light);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s ease;
     }
-    .news-item:last-child { border-bottom: none; }
-    .news-item h4 { margin: 0 0 8px 0; color: #0056b3; }
-    .news-item p { margin: 0 0 8px 0; font-size: 14px; line-height: 1.4; }
-    .news-item small { color: #888; }
 
-    /* Popup di Installazione Stile Glassmorphism */
+    .nav-item.active { color: var(--primary); font-weight: 600; }
+    .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+
     #pwa-install-banner {
       display: none;
       position: fixed;
-      bottom: 20px;
+      bottom: 75px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
-      padding: 15px 25px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+      padding: 14px 20px;
       border-radius: 16px;
-      z-index: 9999;
+      z-index: 1000;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
       width: 90%;
-      max-width: 450px;
+      max-width: 440px;
+      box-sizing: border-box;
     }
-    #pwa-install-banner img {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
+    #pwa-install-banner img { width: 36px; height: 36px; border-radius: 8px; }
+    #pwa-install-banner .text { color: var(--text); font-size: 12px; font-weight: 500; line-height: 1.4; }
+    #pwa-install-banner button { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; }
+    #pwa-install-banner .btn-install { background-color: var(--primary); color: white; }
+    #pwa-install-banner .btn-close { background-color: transparent; color: var(--text-light); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    #pwa-install-banner .text {
-      color: #333;
-      font-size: 13px;
-    }
-    #pwa-install-banner button {
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    #pwa-install-banner .btn-install { background-color: #0056b3; color: white; }
-    #pwa-install-banner .btn-close { background-color: transparent; color: #666; }
   </style>
 </head>
 <body>
 
-  <h1>Area Sanitaria — Dr. Giuseppe Musumeci</h1>
+  <header>
+    <h1>Dr. Giuseppe Musumeci</h1>
+    <p>Piattaforma Sanitaria Digitale</p>
+  </header>
 
-  <div class="app-card" id="auth-container">
-    <h3>Accesso Piattaforma</h3>
-    
-    <div id="user-info" style="display: none;">
-      <p>Account attivo: <strong id="user-name"></strong></p>
-      <button class="btn btn-signout" id="btnSignOut">Disconnetti</button>
-    </div>
-    
-    <div id="auth-forms">
-      <div class="native-login">
-        <input type="email" id="loginEmail" placeholder="Indirizzo Email">
-        <input type="password" id="loginPassword" placeholder="Password">
-        <button class="btn btn-primary" id="btnEmailLogin">Accedi</button>
+  <main>
+    <section id="sec-news" class="app-section active">
+      <div class="app-card">
+        <h3 style="margin-top:0; font-size:18px; color: var(--primary-dark)">Comunicazioni Cliniche</h3>
+        <div id="news-list">Verifica degli aggiornamenti...</div>
       </div>
-      <div class="social-grid">
-        <button class="btn btn-google" id="btnGoogleLogin">Google</button>
-        <button class="btn btn-facebook" id="btnFacebookLogin">Facebook</button>
-      </div>
-    </div>
-  </div>
+    </section>
 
-  <div class="app-card">
-    <h3>Ultime Notizie & Comunicazioni</h3>
-    <div id="news-list">Verifica degli aggiornamenti in corso...</div>
-  </div>
+    <section id="sec-profile" class="app-section">
+      <div class="app-card">
+        <div id="user-info" style="display: none; text-align: center;">
+          <p style="font-size: 15px;">Sessione attiva come:<br><strong id="user-name" style="color:var(--primary); font-size:16px;"></strong></p>
+          <button class="btn btn-signout" id="btnSignOut">Chiudi Sessione</button>
+        </div>
+        
+        <div id="auth-forms">
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login">Accedi</button>
+            <button class="auth-tab" id="tab-register">Registrati</button>
+          </div>
+
+          <div id="group-login" class="form-group active">
+            <input type="email" id="loginEmail" placeholder="Indirizzo Email">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button class="btn btn-primary" id="btnEmailLogin">Accedi</button>
+          </div>
+
+          <div id="group-register" class="form-group">
+            <input type="email" id="regEmail" placeholder="Nuovo Indirizzo Email">
+            <input type="password" id="regPassword" placeholder="Crea Password (min. 6 caratteri)">
+            <button class="btn btn-primary" id="btnEmailRegister">Crea Account</button>
+          </div>
+
+          <div class="divider">oppure prosegui con</div>
+
+          <div class="social-grid">
+            <button class="btn btn-google" id="btnGoogleLogin">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.866-3.577-7.866-8s3.536-8 7.866-8c2.46 0 4.105 1.025 5.047 1.926l3.227-3.227C18.214 1.059 15.469 0 12.24 0 5.58 0 0 5.58 0 12.24s5.58 12.24 12.24 12.24c6.96 0 11.57-4.894 11.57-11.79 0-.795-.085-1.4-.195-2.405H12.24z"/></svg>
+              Google
+            </button>
+            <button class="btn btn-facebook" id="btnFacebookLogin">Facebook</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <div id="pwa-install-banner">
-    <img src="https://webapp.drgiuseppemusumeci.com/favicon.ico" alt="Logo">
-    <div class="text">Installa l'app del Dr. Musumeci per ricevere le notifiche e usarla offline.</div>
+    <img src="https://webapp.drgiuseppemusumeci.com/nosfondologo3.png" alt="Logo">
+    <div class="text">Installa l'app del Dr. Musumeci sul telefono per usarla in postazione offline.</div>
     <button class="btn-install" id="btnPwaInstall">Installa</button>
     <button class="btn-close" id="btnPwaClose">Annulla</button>
   </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchSection('news', this)">
+      <svg viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      News
+    </button>
+    <button class="nav-item" onclick="switchSection('profile', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      Profilo
+    </button>
+  </nav>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
     import { 
-      getAuth, 
-      signInWithPopup, 
-      GoogleAuthProvider, 
-      FacebookAuthProvider, 
-      signInWithEmailAndPassword, 
-      onAuthStateChanged, 
-      signOut 
+      getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, 
+      signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { 
-      initializeFirestore, 
-      enableIndexedDbPersistence, 
-      collection, 
-      onSnapshot, 
-      query, 
-      orderBy 
+      initializeFirestore, enableIndexedDbPersistence, collection, onSnapshot, query, orderBy 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Nuova configurazione Firebase ufficiale associata all'app 'giuseppe-4c318'
     const firebaseConfig = {
       apiKey: "AIzaSyCt6Ti-xk-_7j-CI_MLILkjj6fJem9VPOY",
       authDomain: "giuseppe-4c318.firebaseapp.com",
@@ -190,21 +303,39 @@
       measurementId: "G-T740SVWJ06"
     };
 
-    // Inizializzazione moduli e analisi
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const db = initializeFirestore(app, { localCache: true });
 
-    // Attivazione cache IndexedDB per l'archiviazione dati locale in assenza di rete
     enableIndexedDbPersistence(db).catch((err) => {
-      console.warn("Stato persistenza offline database:", err.code);
+      console.warn("Stato persistenza offline:", err.code);
     });
 
-    // --- SISTEMA DI AUTENTICAZIONE UTENTE ---
+    window.switchSection = function(sectionId, element) {
+      document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      document.getElementById(`sec-${sectionId}`).classList.add('active');
+      element.classList.add('active');
+    };
+
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const groupLogin = document.getElementById('group-login');
+    const groupRegister = document.getElementById('group-register');
+
+    tabLogin.addEventListener('click', () => {
+      tabLogin.classList.add('active'); tabRegister.classList.remove('active');
+      groupLogin.classList.add('active'); groupRegister.classList.remove('active');
+    });
+
+    tabRegister.addEventListener('click', () => {
+      tabRegister.classList.add('active'); tabLogin.classList.remove('active');
+      groupRegister.classList.add('active'); groupLogin.classList.remove('active');
+    });
+
     const googleProvider = new GoogleAuthProvider();
     const facebookProvider = new FacebookAuthProvider();
-
     const authForms = document.getElementById('auth-forms');
     const userInfo = document.getElementById('user-info');
     const userName = document.getElementById('user-name');
@@ -220,105 +351,89 @@
       }
     });
 
-    document.getElementById('btnGoogleLogin').addEventListener('click', () => {
-      signInWithPopup(auth, googleProvider).catch(err => console.error("Autenticazione Google fallita:", err));
-    });
-
-    document.getElementById('btnFacebookLogin').addEventListener('click', () => {
-      signInWithPopup(auth, facebookProvider).catch(err => console.error("Autenticazione Facebook fallita:", err));
+    document.getElementById('btnEmailRegister').addEventListener('click', () => {
+      const email = document.getElementById('regEmail').value;
+      const pass = document.getElementById('regPassword').value;
+      if(email && pass) {
+        createUserWithEmailAndPassword(auth, email, pass)
+          .then(() => alert("Account creato con successo!"))
+          .catch(err => alert("Errore di registrazione: " + err.message));
+      }
     });
 
     document.getElementById('btnEmailLogin').addEventListener('click', () => {
       const email = document.getElementById('loginEmail').value;
       const pass = document.getElementById('loginPassword').value;
       if(email && pass) {
-        signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Errore di accesso nativo: " + err.message));
+        signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Errore: " + err.message));
       }
     });
 
-    document.getElementById('btnSignOut').addEventListener('click', () => {
-      signOut(auth);
+    document.getElementById('btnGoogleLogin').addEventListener('click', () => {
+      signInWithPopup(auth, googleProvider).catch(err => console.error(err));
     });
 
-    // --- PIPELINE DI SINCRONIZZAZIONE NEWS (Firestore Real-time) ---
+    document.getElementById('btnFacebookLogin').addEventListener('click', () => {
+      signInWithPopup(auth, facebookProvider).catch(err => console.error(err));
+    });
+
+    document.getElementById('btnSignOut').addEventListener('click', () => signOut(auth));
+
     const newsList = document.getElementById('news-list');
     const newsQuery = query(collection(db, "news"), orderBy("date", "desc"));
 
     onSnapshot(newsQuery, (snapshot) => {
       if (snapshot.empty) {
-        newsList.innerHTML = "<p>Nessun aggiornamento o comunicazione inserita.</p>";
+        newsList.innerHTML = "<p style='color:var(--text-light); font-size:14px; text-align:center;'>Nessun aggiornamento clinico disponibile.</p>";
         return;
       }
-
       let html = "";
       snapshot.forEach((doc) => {
-        const newsData = doc.data();
-        const formattedDate = newsData.date ? new Date(newsData.date.seconds * 1000).toLocaleDateString('it-IT') : 'Data non specificata';
+        const data = doc.data();
+        const dateFormatted = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString('it-IT') : 'Recente';
         html += `
           <div class="news-item">
-            <h4>${newsData.title || 'Comunicazione'}</h4>
-            <p>${newsData.content || ''}</p>
-            <small>Pubblicato il: ${formattedDate}</small>
+            <h4>${data.title || 'Avviso'}</h4>
+            <p>${data.content || ''}</p>
+            <small>${dateFormatted}</small>
           </div>
         `;
       });
       newsList.innerHTML = html;
-    }, (error) => {
-      console.error("Errore flusso Firestore:", error);
-      newsList.innerHTML = "<p>Servizio temporaneamente non disponibile offline.</p>";
+    }, (err) => {
+      newsList.innerHTML = "<p style='color:var(--text-light);'>Contenuto non disponibile offline.</p>";
     });
 
-    // --- LOGICA DI GESTIONE POPUP INSTALLAZIONE PWA ---
     let deferredPrompt;
     const installBanner = document.getElementById('pwa-install-banner');
     const btnInstall = document.getElementById('btnPwaInstall');
     const btnClose = document.getElementById('btnPwaClose');
 
     window.addEventListener('beforeinstallprompt', (e) => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-      if (isStandalone) return;
-
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return;
       e.preventDefault();
       deferredPrompt = e;
-      
-      if (installBanner) {
-        installBanner.style.display = 'flex';
-      }
+      if (installBanner) installBanner.style.display = 'flex';
     });
 
     if (btnInstall) {
       btnInstall.addEventListener('click', async () => {
         if (deferredPrompt) {
           deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          console.log(`Riscontro utente installazione: ${outcome}`);
+          await deferredPrompt.userChoice;
           deferredPrompt = null;
           installBanner.style.display = 'none';
         }
       });
     }
+    if (btnClose) btnClose.addEventListener('click', () => installBanner.style.display = 'none');
 
-    if (btnClose) {
-      btnClose.addEventListener('click', () => {
-        installBanner.style.display = 'none';
-      });
-    }
-
-    window.addEventListener('appinstalled', () => {
-      if (installBanner) installBanner.style.display = 'none';
-      console.log('Installazione completata con successo.');
-    });
-
-    // Registrazione dell'ambiente Service Worker principale
+    // Percorso relativo per l'aggancio corretto del Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('Service Worker agganciato allo scope:', reg.scope))
-          .catch(err => console.error('Fallimento Service Worker:', err));
+        navigator.serviceWorker.register('service-worker.js').catch(err => console.error(err));
       });
     }
-
-    export { db };
   </script>
 </body>
 </html>
