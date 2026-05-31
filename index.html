@@ -182,6 +182,7 @@
     .nav-item.active { color: var(--primary); font-weight: 600; }
     .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
 
+    /* Banner per Android e sistemi che supportano beforeinstallprompt */
     #pwa-install-banner {
       display: none;
       position: fixed;
@@ -207,6 +208,35 @@
     #pwa-install-banner button { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; }
     #pwa-install-banner .btn-install { background-color: var(--primary); color: white; }
     #pwa-install-banner .btn-close { background-color: transparent; color: var(--text-light); }
+
+    /* Banner specifico ed ottimizzato per iOS Safari */
+    #ios-safari-banner {
+      display: none;
+      position: fixed;
+      bottom: 85px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+      padding: 16px;
+      border-radius: 18px;
+      z-index: 1000;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 85%;
+      max-width: 380px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    #ios-safari-banner img { width: 42px; height: 42px; border-radius: 10px; }
+    #ios-safari-banner .title { font-size: 14px; font-weight: 600; color: var(--primary-dark); }
+    #ios-safari-banner .instructions { font-size: 12px; color: var(--text); line-height: 1.5; margin: 4px 0; }
+    #ios-safari-banner .steps { font-size: 12px; font-weight: 500; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 4px; }
+    #ios-safari-banner .btn-close-ios { background: transparent; border: none; color: var(--text-light); font-size: 11px; text-decoration: underline; cursor: pointer; margin-top: 4px; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
@@ -273,6 +303,18 @@
     <div class="text">Installa l'app del Dr. Musumeci sul telefono per usarla in postazione offline.</div>
     <button class="btn-install" id="btnPwaInstall">Installa</button>
     <button class="btn-close" id="btnPwaClose">Annulla</button>
+  </div>
+
+  <div id="ios-safari-banner">
+    <img src="https://webapp.drgiuseppemusumeci.com/nosfondologo4.png" alt="Logo Apple">
+    <div class="title">Installa l'Applicazione su iOS</div>
+    <div class="instructions">Usa l'app sul tuo iPhone a schermo intero e con supporto offline completo.</div>
+    <div class="steps">
+      Premendo il tasto <strong>Condividi</strong> 
+      <svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align: middle; fill: #007aff;"><path d="M16 5l-1.42 1.42L13 5.83V16h-2V5.83L9.42 7.42 8 6l4-4 4 4zm4 10v4c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2v-4h2v4h12v-4h2z"/></svg>
+      e poi <strong>"Aggiungi alla schermata Home"</strong>.
+    </div>
+    <button class="btn-close-ios" id="btnIosClose">Nascondi nota</button>
   </div>
 
   <nav class="bottom-nav">
@@ -459,6 +501,7 @@
     }
     // ==========================================
 
+    // Gestione Banner PWA Tradizionale (Android / Chrome)
     let deferredPrompt;
     const installBanner = document.getElementById('pwa-install-banner');
     const btnInstall = document.getElementById('btnPwaInstall');
@@ -482,6 +525,28 @@
       });
     }
     if (btnClose) btnClose.addEventListener('click', () => installBanner.style.display = 'none');
+
+    // ==========================================
+    // RILEVAMENTO E CONTROLLO BANNER PER SAFARI (iOS)
+    // ==========================================
+    const iosBanner = document.getElementById('ios-safari-banner');
+    const btnIosClose = document.getElementById('btnIosClose');
+
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    // Se l'utente è su iOS, usa Safari e NON ha ancora installato l'app, mostra il banner
+    if (isIos && isSafari && !isStandalone) {
+      if (iosBanner) iosBanner.style.display = 'flex';
+    }
+
+    if (btnIosClose) {
+      btnIosClose.addEventListener('click', () => {
+        if (iosBanner) iosBanner.style.display = 'none';
+      });
+    }
+    // ==========================================
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
