@@ -190,8 +190,42 @@
             box-sizing: border-box;
         }
 
-        select[multiple] { height: auto; min-height: 130px; padding: 8px; }
+        select[multiple] { height: auto; min-height: 130px; padding: 8px; border-radius: 6px; }
         select[multiple] option { padding: 8px; border-radius: 4px; margin-bottom: 3px; font-weight: 500; }
+
+        /* Stili Editor WYSIWYG */
+        .editor-container {
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background: #ffffff;
+            overflow: hidden;
+        }
+        .editor-toolbar {
+            background: #edf2f7;
+            padding: 8px;
+            border-bottom: 1px solid #cbd5e0;
+            display: flex;
+            gap: 6px;
+        }
+        .editor-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .editor-btn:hover { background: #e2e8f0; color: var(--primary-color); }
+        .editor-box {
+            min-height: 200px;
+            padding: 15px;
+            outline: none;
+            font-size: 1rem;
+            line-height: 1.6;
+            background: white;
+            text-align: left;
+        }
 
         .ente-terzo-input { display: none; margin-top: 15px; background: #edf2f7; padding: 15px; border-radius: 6px; }
         .output-selection-container { display: flex; gap: 15px; margin-top: 30px; }
@@ -270,39 +304,51 @@
             </div>
 
             <div id="section-curante" class="dynamic-section">
-                <h3 style="margin-top:0; color: var(--primary-color);">Dati Comunicazione Interprofessionale</h3>
+                <h3 style="margin-top:0; color: var(--primary-color);">Dati Spedizione e Comunicazione MMG</h3>
                 <div class="form-group">
-                    <label>Destinatario (Dott. / Dott.ssa MMG):</label>
+                    <label>Medico Destinatario (Dott. / Dott.ssa):</label>
                     <input type="text" id="curanteNome" placeholder="Es. Dott. Giovanni Bianchi">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Indirizzo Studio:</label>
+                        <input type="text" id="curanteIndirizzo" placeholder="Es. Via Roma 15">
+                    </div>
+                    <div class="form-group">
+                        <label>CAP, Città (Prov):</label>
+                        <input type="text" id="curanteCitta" placeholder="Es. 95100 Catania (CT)">
+                    </div>
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Oggetto della Segnalazione Clinica:</label>
-                    <input type="text" id="curanteOggetto" placeholder="Es. Condivisione percorso terapeutico e follow-up pz.">
+                    <input type="text" id="curanteOggetto" value="Condivisione percorso terapeutico e follow-up pz.">
                 </div>
             </div>
 
             <div id="section-interno" class="dynamic-section">
-                <p style="margin:0; color: var(--text-muted); font-style: italic;">Modalità Interna Attiva: i dati generati verranno contrassegnati come note cliniche d'archivio.</p>
+                <h3 style="margin-top:0; color: #4a5568;">Configurazione Archivio Privato</h3>
+                <p style="margin:0; color: var(--text-muted); font-style: italic;">Modalità Interna Attiva: i dati generati verranno blindati e contrassegnati come NOTE CLINICHE D'ARCHIVIO RISERVATO.</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="fileCodeInput">Codice Identificativo File / Protocollo:</label>
+                    <input type="text" id="fileCodeInput" value="DM-2026-REG">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end; padding-bottom: 12px;">
+                    <label class="checkbox-label" style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight: bold;">
+                        <input type="checkbox" id="logoAE" checked> Includi Intestazione Ufficiale
+                    </label>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="fileCodeInput">Codice Identificativo File / Protocollo:</label>
-                <input type="text" id="fileCodeInput" value="DM-2026-REG">
-            </div>
-
-            <div class="form-group">
-                <label class="checkbox-label" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                    <input type="checkbox" id="logoAE" checked> Includi Intestazione Ufficiale (Dr. Giuseppe Musumeci)
-                </label>
-            </div>
-
-            <div class="form-group">
-                <label for="collabOption">Classificazioni e Diciture di Stato:</label>
+                <label for="collabOption">Classificazioni e Diciture di Stato (Impatto Visivo):</label>
                 <select id="collabOption" multiple>
                     <option value="nessuna" selected>Nessuna dicitura aggiuntiva</option>
-                    <option value="uso_interno">⚠️ Dati Sensibili - Uso Interno Riservato</option>
-                    <option value="top_secret">🛑 TOP SECRET (Stile Fascicolo Cinematico)</option>
-                    <option value="bozza_progetto">📝 Bozza di Relazione (Draft)</option>
+                    <option value="uso_interno">⚠️ DATI SENSIBILI - Uso Interno Riservato (Evidenziato Rosso)</option>
+                    <option value="top_secret">🛑 TOP SECRET (Stile Fascicolo Militare)</option>
+                    <option value="bozza_progetto">📝 Bozza di Relazione / Draft (Arancione)</option>
                     <option value="ente_terzo">🏢 Includi Box Logo Ente Terzo Personalizzato</option>
                 </select>
                                 
@@ -319,8 +365,16 @@
             </div>
 
             <div class="form-group">
-                <label for="docContent">Corpo del Testo Clinico / Diagnostico:</label>
-                <textarea id="docContent" rows="6" placeholder="Inserire il testo del documento..."></textarea>
+                <label>Corpo del Testo Clinico / Diagnostico:</label>
+                <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <button type="button" class="editor-btn" title="Grassetto" onclick="formatDoc('bold')">B</button>
+                        <button type="button" class="editor-btn" title="Corsivo" onclick="formatDoc('italic')">I</button>
+                        <button type="button" class="editor-btn" title="Sottolineato" onclick="formatDoc('underline')">U</button>
+                        <button type="button" class="editor-btn" title="Puntato" onclick="formatDoc('insertUnorderedList')">• Lista</button>
+                    </div>
+                    <div id="docContent" class="editor-box" contenteditable="true" placeholder="Scrivi il testo clinico qui..."></div>
+                </div>
             </div>
 
             <div class="output-selection-container">
@@ -363,6 +417,11 @@
         let scannerActive = true;
         let errorTimeout = null;
 
+        window.formatDoc = function(cmd) {
+            document.execCommand(cmd, false, null);
+            document.getElementById('docContent').focus();
+        };
+
         function switchMode(mode) {
             currentMode = mode;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -373,15 +432,12 @@
             document.getElementById('section-curante').style.display = (mode === 'curante') ? 'block' : 'none';
         }
 
-        // Interrogazione asincrona sicura a Firebase Firestore
         async function verifyScannedCode(scannedCode) {
             if (!scannedCode) return;
             try {
-                // Legge il documento che ha come ID il codice inserito nella collezione "operatori"
                 const docRef = doc(db, "operatori", scannedCode);
                 const docSnap = await getDoc(docRef);
 
-                // Controllo se il documento esiste E se il campo 'name' è presente e non vuoto
                 if (docSnap.exists() && docSnap.data().name && docSnap.data().name.trim() !== "") {
                     scannerActive = false;
                     clearTimeout(errorTimeout);
@@ -393,7 +449,6 @@
                     document.getElementById("configSection").style.display = "block";
                     document.getElementById("codeDisplay").innerText = `${currentActiveOperator} (${scannedCode})`;
                     
-                    // Pannello Admin visibile solo se l'operatore è loggato come ADMIN
                     if (scannedCode === "66699923" || currentActiveOperator === "ADMIN") {
                         document.getElementById("adminPanel").style.display = "block";
                     } else {
@@ -403,7 +458,7 @@
                     triggerScanError();
                 }
             } catch (err) {
-                console.error("Errore di comunicazione con Firestore. Controlla le regole di sicurezza: ", err);
+                console.error("Errore di comunicazione con Firestore: ", err);
                 triggerScanError();
             }
         }
@@ -445,7 +500,6 @@
             }, 2500);
         }
 
-        // Eventi e Agganci dell'interfaccia ad isolamento di modulo
         document.getElementById("btnUnlockManual").addEventListener("click", () => verifyScannedCode(document.getElementById("manualCodeInput").value.trim()));
         document.getElementById("btnRegisterAdmin").addEventListener("click", registerNewOperator);
         document.getElementById("btnProcessDoc").addEventListener("click", processDocumentExecution);
@@ -481,30 +535,8 @@
             document.getElementById("scannerSection").style.display = "flex";
             document.getElementById("configSection").style.display = "none";
             document.getElementById("manualCodeInput").value = "";
+            document.getElementById("docContent").innerHTML = "";
             switchMode("paziente");
-        }
-
-        // Funzioni Generazione File
-        function getImageDimensions(url) {
-            return new Promise((resolve) => {
-                const img = new Image(); img.crossOrigin = "Anonymous";
-                img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight, ratio: img.naturalWidth / img.naturalHeight });
-                img.onerror = () => resolve({ width: 150, height: 50, ratio: 3 });
-                img.src = url;
-            });
-        }
-
-        async function getLogoImageBuffer(url) {
-            try {
-                const response = await fetch(url, { mode: 'cors' });
-                if (!response.ok) return null;
-                const blob = await response.blob();
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsArrayBuffer(blob);
-                });
-            } catch (e) { return null; }
         }
 
         function processDocumentExecution() {
@@ -513,112 +545,110 @@
             else generatePdfOrPrint(format);
         }
 
-        // GENERAZIONE DOCX
+        // GENERAZIONE DOCX (Testo semplice derivato da Editor)
         async function generateDocx() {
             const selectedFileCode = document.getElementById("fileCodeInput").value.trim() || "DOC-MEDICO";
-            const serveAE = document.getElementById("logoAE").checked;
-            const opzioniSelezionate = Array.from(document.getElementById("collabOption").selectedOptions).map(opt => opt.value);
-            const enteTerzoLabel = document.getElementById("enteTerzoLabel").value.trim();
-            const enteTerzoUrl = document.getElementById("enteTerzoUrl").value.trim();
-            const testoCorpo = document.getElementById("docContent").value || "Nessun contenuto inserito.";
+            const testoCorpo = document.getElementById("docContent").innerText || "Nessun contenuto inserito.";
 
-            let headerElements = [
+            let bodyElements = [
                 new docx.Paragraph({
-                    children: [new docx.TextRun({ text: "DR. GIUSEPPE MUSUMECI - LIBERA PROFESSIONE SANITARIA", bold: true, size: 16, font: "Arial", color: "0056B3" })],
-                    alignment: docx.AlignmentType.RIGHT
+                    children: [new docx.TextRun({ text: "DR. GIUSEPPE MUSUMECI - ESPORTAZIONE WORD", bold: true, size: 20, font: "Arial", color: "0056B3" })]
+                }),
+                new docx.Paragraph({
+                    children: [new docx.TextRun({ text: `Protocollo: ${selectedFileCode}\nOperatore: ${currentActiveOperator}\n\n`, font: "Arial" })]
+                }),
+                new docx.Paragraph({
+                    children: [new docx.TextRun({ text: "CONTENUTO REQUISITO:\n", bold: true }), new docx.TextRun({ text: testoCorpo, font: "Arial" })]
                 })
             ];
 
-            let bodyElements = [];
-
-            if (opzioniSelezionate.includes("top_secret")) {
-                bodyElements.push(new docx.Paragraph({
-                    children: [new docx.TextRun({ text: "💥 CLASSIFIED: TOP SECRET 💥", bold: true, size: 36, font: "Courier New", color: "E53E3E" })],
-                    alignment: docx.AlignmentType.CENTER,
-                    spacing: { before: 2500, after: 150 }
-                }));
-                bodyElements.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
-            }
-
-            if (serveAE) {
-                const dims = await getImageDimensions(LOGO_MEDICO_FILE);
-                const imgBuf = await getLogoImageBuffer(LOGO_MEDICO_FILE);
-                if (imgBuf) {
-                    bodyElements.push(new docx.Paragraph({
-                        children: [new docx.ImageRun({ data: imgBuf, transformation: { width: 40 * dims.ratio, height: 40 } })],
-                        spacing: { after: 150 }
-                    }));
-                }
-            }
-
-            let titoloDoc = currentMode === 'paziente' ? "REFERTO MEDICO / DOCUMENTAZIONE PAZIENTE" : (currentMode === 'curante' ? "COMUNICAZIONE MEDICA INTERPROFESSIONALE" : "RELAZIONE INTERNA");
-
-            bodyElements.push(new docx.Paragraph({
-                children: [new docx.TextRun({ text: titoloDoc, bold: true, size: 24, font: "Arial", color: "2D3748" })],
-                spacing: { before: 100, after: 200 }
-            }));
-
-            let tableRows = [
-                new docx.TableRow({
-                    children: [
-                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: "Parametro", bold: true, font: "Arial", color: "FFFFFF" })] })], backgroundColor: "0056B3" }),
-                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: "Valore", bold: true, font: "Arial", color: "FFFFFF" })] })], backgroundColor: "0056B3" }),
-                    ]
-                }),
-                new docx.TableRow({
-                    children: [
-                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: "File ID", font: "Arial" })] })] }),
-                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: selectedFileCode, bold: true, font: "Arial" })] })] }),
-                    ]
-                }),
-                new docx.TableRow({
-                    children: [
-                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: "Operatore", font: "Arial" })] })] }),
-                        new docx.TableCell({ children: [new docx.Paragraph({ children: [new docx.TextRun({ text: currentActiveOperator, bold: true, font: "Arial" })] })] }),
-                    ]
-                })
-            ];
-
-            bodyElements.push(new docx.Table({ rows: tableRows, width: { size: 100, type: docx.WidthType.PERCENTAGE }, spacing: { after: 300 } }));
-
-            bodyElements.push(
-                new docx.Paragraph({ children: [new docx.TextRun({ text: "VALUTAZIONE CLINICA", bold: true, size: 18, font: "Arial", color: "0056B3" })], spacing: { before: 200, after: 120 } }),
-                new docx.Paragraph({ children: [new docx.TextRun({ text: testoCorpo, font: "Arial" })] })
-            );
-
-            const doc = new docx.Document({ sections: [{ headers: { default: new docx.Header({ children: headerElements }) }, children: bodyElements }] });
+            const doc = new docx.Document({ sections: [{ children: bodyElements }] });
             docx.Packer.toBlob(doc).then((blob) => saveAs(blob, `Documento_Musumeci_${selectedFileCode}.docx`));
         }
 
-        // GENERAZIONE PDF / ANTEPRIMA STAMPA CON MARGINI DI BORDO DIRETTI
+        // GENERAZIONE PDF / ANTEPRIMA DI STAMPA CON LAYOUT BUSTA E STRUTTURE STILE AVANZATE
         function generatePdfOrPrint(actionType) {
             const selectedFileCode = document.getElementById("fileCodeInput").value.trim() || "DOC-MEDICO";
             const serveAE = document.getElementById("logoAE").checked;
             const opzioniSelezionate = Array.from(document.getElementById("collabOption").selectedOptions).map(opt => opt.value);
             const enteTerzoLabel = document.getElementById("enteTerzoLabel").value.trim();
             const enteTerzoUrl = document.getElementById("enteTerzoUrl").value.trim();
-            const testoCorpo = document.getElementById("docContent").value || "Nessun contenuto inserito.";
+            const testoCorpoHTML = document.getElementById("docContent").innerHTML || "Nessun contenuto inserito.";
 
-            let imgAEHtml = serveAE ? `<img src="${LOGO_MEDICO_FILE}" style="height:42px; width:auto;">` : '';
-            let titoloDoc = currentMode === 'paziente' ? "REFERTO MEDICO / DOCUMENTAZIONE PAZIENTE" : (currentMode === 'curante' ? "LETTERA AL MEDICO CURANTE" : "NOTE CLINICHE ED ARCHIVIO INTERNO");
+            let imgAEHtml = serveAE ? `<img src="${LOGO_MEDICO_FILE}" style="height:45px; width:auto;">` : '';
+            
+            // Gestione dei titoli di testata in base al tipo documento
+            let titoloDoc = "DOCUMENTAZIONE SANITARIA";
+            if(currentMode === 'paziente') titoloDoc = "REFERTO MEDICO / DOCUMENTAZIONE PAZIENTE";
+            if(currentMode === 'interno') titoloDoc = "NOTE CLINICHE ED ARCHIVIO INTERNO RISERVATO";
+            if(currentMode === 'curante') titoloDoc = "COMUNICAZIONE MEDICA INTERPROFESSIONALE";
 
-            let specificMetaHtml = "";
-            if (currentMode === 'paziente') {
-                specificMetaHtml = `
-                    <tr><td><strong>Paziente</strong></td><td>${document.getElementById('pazNome').value || '---'}</td></tr>
-                    <tr><td><strong>Codice Fiscale</strong></td><td>${document.getElementById('pazCF').value || '---'}</td></tr>`;
+            // Costruzione Banners di Classificazione ad alto impatto visivo
+            let bannersClassificazioneHtml = "";
+            if (opzioniSelezionate.includes("uso_interno") || currentMode === 'interno') {
+                bannersClassificazioneHtml += `
+                    <div class="banner-badge banner-sensibile">
+                        ⚠️ ATTENZIONE: DOCUMENTO CONTENENTE DATI SENSIBILI EX REG. UE 2016/679 - USO INTERNO STRETTAMENTE RISERVATO
+                    </div>`;
+            }
+            if (opzioniSelezionate.includes("bozza_progetto")) {
+                bannersClassificazioneHtml += `
+                    <div class="banner-badge banner-bozza">
+                        📝 STATO DOCUMENTALE: BOZZA / DRAFT CLINICO NON DEFINITIVO
+                    </div>`;
             }
 
             let topSecretCoverHtml = "";
             if (opzioniSelezionate.includes("top_secret")) {
                 topSecretCoverHtml = `
                     <div class="page-cover-topsecret">
-                        <div class="classified-banner">💥 CLASSIFIED: TOP SECRET 💥</div>
-                        <div style="margin-top: 100px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 2; text-align:center; color: #4a5568;">
-                            <p><strong>REGISTRO FILE ID:</strong> ${selectedFileCode}</p>
-                            <p><strong>FIRMATARIO:</strong> ${currentActiveOperator}</p>
-                            <p><strong>VALIDAZIONE:</strong> FIREBASE CLOUD SYSTEM VERIFIED</p>
+                        <div class="classified-banner">🛑 FASCICOLO PROTETTO: TOP SECRET 🛑</div>
+                        <div style="margin-top: 100px; font-family: 'Courier New', monospace; font-size: 15px; line-height: 2; text-align:center; color: #2d3748;">
+                            <p><strong>REGISTRO CRITTOGRAFICO ID:</strong> ${selectedFileCode}</p>
+                            <p><strong>RESPONSABILE VALIDAZIONE:</strong> ${currentActiveOperator}</p>
+                            <p><strong>SISTEMA CLOUD INFRASTRUTTURA:</strong> FIREBASE CLOUD VERIFIED</p>
                         </div>
+                    </div>`;
+            }
+
+            // Layout Variabile Intermedio per i Dati Specifici delle Tab
+            let bloccoDatiDinamiciHtml = "";
+            let layoutLetteraFinestrellaHtml = "";
+
+            if (currentMode === 'paziente') {
+                bloccoDatiDinamiciHtml = `
+                    <table class="meta-table">
+                        <thead><tr><th>Riferimento Paziente</th><th>Dettaglio Identificativo Anagrafico</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Paziente</strong></td><td>${document.getElementById('pazNome').value || '---'}</td></tr>
+                            <tr><td><strong>Codice Fiscale</strong></td><td>${document.getElementById('pazCF').value || '---'}</td></tr>
+                            <tr><td><strong>Data di Nascita</strong></td><td>${document.getElementById('pazNascita').value || '---'}</td></tr>
+                        </tbody>
+                    </table>`;
+            } else if (currentMode === 'interno') {
+                bloccoDatiDinamiciHtml = `
+                    <div style="background: #edf2f7; border: 1px solid #cbd5e0; padding: 15px; border-radius: 6px; font-size: 13px; margin: 20px 0;">
+                        <strong>PROPRIETÀ DI ARCHIVIO:</strong> Questa nota è vincolata al segreto professionale interno. Non fa parte del foglio di dimissione diretta del paziente.
+                    </div>`;
+            } else if (currentMode === 'curante') {
+                // Configurazione per Busta con Finestrella Standard (Posizionata a Destra)
+                let drNome = document.getElementById('curanteNome').value || '---';
+                let drIndirizzo = document.getElementById('curanteIndirizzo').value || '---';
+                let drCitta = document.getElementById('curanteCitta').value || '---';
+                let drOggetto = document.getElementById('curanteOggetto').value || '---';
+
+                layoutLetteraFinestrellaHtml = `
+                    <div class="blocco-finestrella-busta">
+                        <div class="indicatore-destinatario">
+                            <strong>Spett.le</strong><br>
+                            ${drNome}<br>
+                            ${drIndirizzo}<br>
+                            ${drCitta}
+                        </div>
+                    </div>
+                    <div class="linea-piegatura-tratteggio"></div>
+                    <div class="oggetto-lettera">
+                        <strong>OGGETTO:</strong> ${drOggetto}
                     </div>`;
             }
 
@@ -639,10 +669,9 @@
                     <meta charset="UTF-8">
                     <title>${selectedFileCode}</title>
                     <style>
-                        /* CONFIGURAZIONE DI BORDO E MARGINI REALI PER PDF E STAMPA */
                         @page {
                             size: A4;
-                            margin: 25mm 20mm 25mm 20mm; /* Ampio spazio ai bordi (Su, Destra, Giù, Sinistra) */
+                            margin: 25mm 20mm 25mm 20mm;
                         }
                         body { 
                             font-family: Arial, sans-serif; 
@@ -659,16 +688,72 @@
                             box-sizing: border-box;
                         }
                         .classified-banner {
-                            border: 6px dashed #e53e3e; color: #e53e3e; font-size: 34px; font-weight: bold; 
-                            text-align: center; padding: 25px; margin: 0 auto; max-width: 90%; letter-spacing: 4px;
+                            border: 6px dashed #e53e3e; color: #e53e3e; font-size: 30px; font-weight: bold; 
+                            text-align: center; padding: 25px; margin: 0 auto; max-width: 90%; letter-spacing: 2px;
                             font-family: 'Courier New', monospace; background-color: rgba(229, 62, 62, 0.02);
                         }
-                        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px; }
+                        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0056b3; padding-bottom: 15px; margin-bottom: 25px; }
+                        
+                        /* Layout Finestrella Busta Commerciale standard (Italiano Destra) */
+                        .blocco-finestrella-busta {
+                            position: relative;
+                            width: 100%;
+                            height: 45mm;
+                            margin-bottom: 10mm;
+                        }
+                        .indicatore-destinatario {
+                            position: absolute;
+                            left: 105mm; /* Distanza millimetrica precisa per finestra a destra */
+                            top: 5mm;
+                            width: 85mm;
+                            height: 38mm;
+                            padding: 10px;
+                            border: 1px dashed #cbd5e0; /* Tratteggio visivo guida per busta */
+                            border-radius: 4px;
+                            box-sizing: border-box;
+                            font-size: 14px;
+                            line-height: 1.4;
+                            background: #fafafa;
+                        }
+                        .linea-piegatura-tratteggio {
+                            width: 100%;
+                            border-bottom: 1px dotted #cbd5e0;
+                            margin: 15px 0;
+                            position: relative;
+                        }
+                        .oggetto-lettera {
+                            font-size: 15px;
+                            margin: 20px 0;
+                            padding: 8px 0;
+                            border-bottom: 1px solid #e2e8f0;
+                        }
+
+                        /* Stili Banners Diciture ad Alto Impatto */
+                        .banner-badge {
+                            padding: 12px 15px;
+                            font-weight: bold;
+                            font-size: 12px;
+                            border-radius: 6px;
+                            margin-bottom: 20px;
+                            text-align: center;
+                            letter-spacing: 0.5px;
+                        }
+                        .banner-sensibile {
+                            background-color: #fff5f5;
+                            border: 2px solid #e53e3e;
+                            color: #c53030;
+                        }
+                        .banner-bozza {
+                            background-color: #fffaf0;
+                            border: 2px solid #dd6b20;
+                            color: #dd6b20;
+                        }
+
                         .meta-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
                         .meta-table th, .meta-table td { border: 1px solid #e2e8f0; padding: 10px; font-size: 13px; text-align: left; }
                         .meta-table th { background-color: #0056b3; color: white; }
                         .content { font-size: 14px; line-height: 1.7; white-space: pre-wrap; margin-top: 25px; text-align: justify; }
-                        .page-footer-fascicolo { border-top: 1px dashed #cbd5e0; margin-top: 50px; padding-top: 10px; font-size: 11px; color: #a0aec0; display: flex; justify-content: space-between; }
+                        .page-footer-fascicolo { border-top: 1px dashed #cbd5e0; margin-top: 60px; padding-top: 10px; font-size: 11px; color: #a0aec0; display: flex; justify-content: space-between; }
                     </style>
                 </head>
                 <body>
@@ -680,29 +765,32 @@
                             <span style="font-weight:bold; color:#0056b3; font-size:16px;">Dr. Giuseppe Musumeci</span>
                         </div>
                         <div style="text-align:right; font-size:11px; color:#718096; font-weight:bold;">
-                            LIBERA PROFESSIONE SANITARIA<br><span style="color:#38a169;">VALIDAZIONE DIGITALE</span>
+                            LIBERA PROFESSIONE SANITARIA<br><span style="color:#38a169;">VALIDAZIONE DIGITALE CLOUD</span>
                         </div>
                     </div>
 
-                    <h2>${titoloDoc}</h2>
+                    ${bannersClassificazioneHtml}
+
+                    <h2 style="text-align: left; color: #2d3748; font-size: 20px; margin-bottom: 20px;">${titoloDoc}</h2>
 
                     <table class="meta-table">
-                        <thead><tr><th>Riferimento di Registro</th><th>Dettaglio Identificativo</th></tr></thead>
+                        <thead><tr><th>Parametro di Registro</th><th>Dettaglio Autorizzato</th></tr></thead>
                         <tbody>
-                            <tr><td><strong>Codice Identificativo Documento</strong></td><td style="color:#0056b3; font-weight:bold;">${selectedFileCode}</td></tr>
-                            <tr><td><strong>Operatore Validante</strong></td><td>${currentActiveOperator}</td></tr>
-                            ${specificMetaHtml}
+                            <tr><td><strong>Codice Identificativo File</strong></td><td style="color:#0056b3; font-weight:bold;">${selectedFileCode}</td></tr>
+                            <tr><td><strong>Operatore Responsabile</strong></td><td>${currentActiveOperator}</td></tr>
                         </tbody>
                     </table>
 
+                    ${layoutLetteraFinestrellaHtml}
+                    ${bloccoDatiDinamiciHtml}
                     ${boxCollaborazioneHtml}
 
-                    <h4 style="color:#0056b3; margin-top:30px; border-bottom:1px solid #e2e8f0; padding-bottom:5px; text-transform: uppercase;">Valutazione Clinica e Diagnostica</h4>
-                    <div class="content">${testoCorpo}</div>
+                    <h4 style="color:#0056b3; margin-top:30px; border-bottom:1px solid #e2e8f0; padding-bottom:5px; text-transform: uppercase;">Corpo del Documento / Relazione</h4>
+                    <div class="content">${testoCorpoHTML}</div>
 
                     <div class="page-footer-fascicolo">
                         <span>Fascicolo Registro: ${selectedFileCode}</span>
-                        <span>Operatore Cloud: ${currentActiveOperator}</span>
+                        <span>Operatore Connesso: ${currentActiveOperator}</span>
                     </div>
 
                     <script>
