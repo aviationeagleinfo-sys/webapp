@@ -2,9 +2,18 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dr. Giuseppe Musumeci</title>
   
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "f65ebf35-3fc6-4a9b-abae-29266ce4cd37",
+      });
+    });
+  </script>
+
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/x-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
   <meta name="theme-color" content="#0056b3">
@@ -66,67 +75,21 @@
     <button class="btn-close" id="btnPwaClose">No, grazie</button>
   </div>
 
-  <script>
-    // 1. Registrazione del Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('Service Worker registrato:', reg.scope))
-          .catch(err => console.error('Errore registrazione SW:', err));
-      });
-    }
-
-    // 2. Gestione del Popup di Installazione Nativo
-    let deferredPrompt;
-    const installBanner = document.getElementById('pwa-install-banner');
-    const btnInstall = document.getElementById('btnPwaInstall');
-    const btnClose = document.getElementById('btnPwaClose');
-
-    // Controlla se l'utente sta già eseguendo l'app in modalità standalone (installata)
-    const isAppInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-    if (!isAppInstalled) {
-      window.addEventListener('beforeinstallprompt', (e) => {
-        // Impedisce a Chrome di mostrare il suo mini-infobar automatico
-        e.preventDefault();
-        // Salva l'evento in modo che possa essere attivato premendo il pulsante "Installa"
-        deferredPrompt = e;
-        // Mostra il nostro banner personalizzato
-        installBanner.style.display = 'flex';
-      });
-    }
-
-    // Azione sul click di "Installa"
-    btnInstall.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        // Mostra il prompt nativo del browser (Vuoi installare questa app?)
-        deferredPrompt.prompt();
-        // Attendi la risposta dell'utente
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`Scelta utente: ${outcome}`);
-        // Resetta la variabile del prompt, non può essere riutilizzata
-        deferredPrompt = null;
-        // Nascondi il banner
-        installBanner.style.display = 'none';
-      }
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "f65ebf35-3fc6-4a9b-abae-29266ce4cd37",
     });
+  });
+</script>
 
-    // Azione sul click di "No, grazie"
-    btnClose.addEventListener('click', () => {
-      installBanner.style.display = 'none';
-    });
-
-    // Se l'app viene installata con successo, nasconde il banner immediatamente
-    window.addEventListener('appinstalled', () => {
-      console.log('PWA installata con successo dal dispositivo.');
-      installBanner.style.display = 'none';
-    });
-    <script type="module">
-  // 1. Importazione dei moduli necessari tramite CDN ufficiale di Firebase v10
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { initializeFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 2. La tua configurazione ufficiale Firebase
+  // Configurazione Firebase 'staff-operatori-mg'
   const firebaseConfig = {
     apiKey: "AIzaSyDYcwhZdpOkNOJwt_2oIBGIDED4y7fVVm0",
     authDomain: "staff-operatori-mg.firebaseapp.com",
@@ -136,30 +99,66 @@
     appId: "1:797244866930:web:c15c3810bf4a6ebeb89deb"
   };
 
-  // 3. Inizializzazione dell'App
   const app = initializeApp(firebaseConfig);
+  const db = initializeFirestore(app, { localCache: true });
 
-  // 4. Inizializzazione di Firestore con cache locale attiva
-  const db = initializeFirestore(app, {
-    localCache: true
+  enableIndexedDbPersistence(db).catch((err) => {
+    console.warn("Stato persistenza offline:", err.code);
   });
 
-  // 5. Attivazione della persistenza IndexedDB per l'uso Offline totale
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code == 'failed-precondition') {
-      // Questo accade se l'utente ha aperto il software in più schede del browser contemporaneamente
-      console.warn("Persistenza offline non attivata: ci sono più schede aperte del sito.");
-    } else if (err.code == 'unimplemented') {
-      // Il browser corrente (molto vecchio o in modalità incognita restrittiva) non supporta IndexedDB
-      console.error("Il browser corrente non supporta la persistenza offline.");
+  // --- LOGICA REVISIONATA DEL POPUP DI INSTALLAZIONE ---
+  let deferredPrompt;
+  const installBanner = document.getElementById('pwa-install-banner');
+  const btnInstall = document.getElementById('btnPwaInstall');
+  const btnClose = document.getElementById('btnPwaClose');
+
+  // Ascolta l'evento del browser senza restrizioni preventive
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Verifica se siamo già dentro l'app installata. Se sì, non fare nulla.
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) return;
+
+    // Blocca il banner automatico di Chrome
+    e.preventDefault();
+    // Salva l'evento per usarlo al clic
+    deferredPrompt = e;
+    // Mostra il nostro popup personalizzato
+    if (installBanner) {
+      installBanner.style.display = 'flex';
     }
   });
 
-  console.log("Firebase collegato al database 'staff-operatori-mg' e pronto offline!");
-  
-  // Esporta 'db' se hai bisogno di usarlo in altri moduli JS del tuo software interno
-  export { db };
+  if (btnInstall) {
+    btnInstall.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Risposta installazione: ${outcome}`);
+        deferredPrompt = null;
+        installBanner.style.display = 'none';
+      }
+    });
+  }
+
+  if (btnClose) {
+    btnClose.addEventListener('click', () => {
+      installBanner.style.display = 'none';
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    if (installBanner) installBanner.style.display = 'none';
+    console.log('Applicazione installata con successo sulla home.');
+  });
+
+  // Registrazione del Service Worker standard
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('Service Worker registrato su:', reg.scope))
+        .catch(err => console.error('Errore Service Worker:', err));
+    });
+  }
 </script>
-  </script>
 </body>
 </html>
