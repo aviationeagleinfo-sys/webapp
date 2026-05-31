@@ -1,91 +1,126 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accesso Riservato - drgiuseppemusumeci.com</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dr. Giuseppe Musumeci</title>
+  
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/x-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
+  <meta name="theme-color" content="#0056b3">
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f9;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            text-align: center;
-            background: #ffffff;
-            padding: 40px 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            max-width: 500px;
-            width: 100%;
-            border-top: 5px solid #0056b3; /* Richiamo all'ambito medico/istituzionale */
-        }
-
-        .icon {
-            font-size: 48px;
-            color: #dc3545;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        p {
-            font-size: 15px;
-            color: #718096;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .divider {
-            height: 1px;
-            background-color: #e2e8f0;
-            margin-bottom: 20px;
-        }
-
-        .footer {
-            font-size: 13px;
-            color: #a0aec0;
-        }
-    </style>
+  <style>
+    /* Stile per il Banner/Popup di Installazione */
+    #pwa-install-banner {
+      display: none; /* Nascosto di default */
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+      padding: 15px 25px;
+      border-radius: 16px;
+      z-index: 9999;
+      font-family: sans-serif;
+      align-items: center;
+      gap: 15px;
+    }
+    #pwa-install-banner img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+    }
+    #pwa-install-banner .text {
+      color: #333;
+      font-size: 14px;
+    }
+    #pwa-install-banner button {
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #pwa-install-banner .btn-install {
+      background-color: #0056b3;
+      color: white;
+    }
+    #pwa-install-banner .btn-close {
+      background-color: transparent;
+      color: #666;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Icona di blocco/avviso -->
-        <div class="icon">🔒</div>
-        
-        <!-- Messaggio principale richiesto -->
-        <h1>Questo sottodominio è riservato</h1>
-        
-        <p>L'accesso a questa sezione della piattaforma è limitato al personale autorizzato o a configurazioni di sistema interne.</p>
-        
-        <div class="divider"></div>
-        
-        <!-- Informazioni sul dominio principale -->
-        <div class="footer">
-            Tutti i diritti riservati.
-        </div>
-    </div>
+  <h1>Sito Web Dr. Giuseppe Musumeci</h1>
 
+  <div id="pwa-install-banner">
+    <img src="https://webapp.drgiuseppemusumeci.com/favicon.ico" alt="Logo">
+    <div class="text">Installa l'app del Dr. Musumeci sul tuo dispositivo per un accesso rapido anche offline.</div>
+    <button class="btn-install" id="btnPwaInstall">Installa</button>
+    <button class="btn-close" id="btnPwaClose">No, grazie</button>
+  </div>
+
+  <script>
+    // 1. Registrazione del Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('Service Worker registrato:', reg.scope))
+          .catch(err => console.error('Errore registrazione SW:', err));
+      });
+    }
+
+    // 2. Gestione del Popup di Installazione Nativo
+    let deferredPrompt;
+    const installBanner = document.getElementById('pwa-install-banner');
+    const btnInstall = document.getElementById('btnPwaInstall');
+    const btnClose = document.getElementById('btnPwaClose');
+
+    // Controlla se l'utente sta già eseguendo l'app in modalità standalone (installata)
+    const isAppInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (!isAppInstalled) {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // Impedisce a Chrome di mostrare il suo mini-infobar automatico
+        e.preventDefault();
+        // Salva l'evento in modo che possa essere attivato premendo il pulsante "Installa"
+        deferredPrompt = e;
+        // Mostra il nostro banner personalizzato
+        installBanner.style.display = 'flex';
+      });
+    }
+
+    // Azione sul click di "Installa"
+    btnInstall.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        // Mostra il prompt nativo del browser (Vuoi installare questa app?)
+        deferredPrompt.prompt();
+        // Attendi la risposta dell'utente
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Scelta utente: ${outcome}`);
+        // Resetta la variabile del prompt, non può essere riutilizzata
+        deferredPrompt = null;
+        // Nascondi il banner
+        installBanner.style.display = 'none';
+      }
+    });
+
+    // Azione sul click di "No, grazie"
+    btnClose.addEventListener('click', () => {
+      installBanner.style.display = 'none';
+    });
+
+    // Se l'app viene installata con successo, nasconde il banner immediatamente
+    window.addEventListener('appinstalled', () => {
+      console.log('PWA installata con successo dal dispositivo.');
+      installBanner.style.display = 'none';
+    });
+  </script>
 </body>
 </html>
