@@ -2,12 +2,12 @@
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
 // 2. CONFIGURAZIONE CACHE DELLA PWA
-const CACHE_NAME = 'dr-musumeci-v1';
+const CACHE_NAME = 'dr-musumeci-v2';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  'https://webapp.drgiuseppemusumeci.com/favicon.ico'
+  '.',
+  'index.html',
+  'manifest.json',
+  'https://webapp.drgiuseppemusumeci.com/nosfondologo3.png'
 ];
 
 // Installazione e salvataggio iniziale in Cache
