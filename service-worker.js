@@ -1,7 +1,7 @@
-// PRIMA RIGA IN ASSOLUTO DEL FILE:
-importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
+// 1. IMPORTAZIONE DI ONESIGNAL (In cima a tutto)
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-// Sotto continua il tuo codice precedente per la cache offline...
+// 2. CONFIGURAZIONE CACHE DELLA PWA
 const CACHE_NAME = 'dr-musumeci-v1';
 const ASSETS_TO_CACHE = [
   '/',
@@ -10,36 +10,23 @@ const ASSETS_TO_CACHE = [
   'https://webapp.drgiuseppemusumeci.com/favicon.ico'
 ];
 
-// ... resto del codice del service worker ...
-const CACHE_NAME = 'dr-musumeci-v1';
-// Elenca qui i file principali che vuoi siano disponibili offline
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  'https://webapp.drgiuseppemusumeci.com/favicon.ico'
-];
-
-// Installazione del Service Worker e salvataggio iniziale in Cache
+// Installazione e salvataggio iniziale in Cache
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Cache aperta con successo');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  // Forza il Service Worker attivo a prendere subito il controllo
   self.skipWaiting();
 });
 
-// Attivazione e pulizia delle vecchie cache (gestione aggiornamenti)
+// Attivazione e pulizia delle vecchie cache
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('Rimozione vecchia cache:', cache);
             return caches.delete(cache);
           }
         })
@@ -48,12 +35,18 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Strategia di recupero: Prima la rete, se fallisce (offline) usa la cache
+// Strategia di recupero: Prima la rete, se fallisce usa la cache
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // Escludi le pagine dei software interni o admin dal caching
+  if (url.pathname.startsWith('/software/') || url.pathname.startsWith('/admin/')) {
+    return; 
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Se la risposta è valida, la duplichiamo nella cache aggiornandola
         if (event.request.method === 'GET' && response.status === 200) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -62,9 +55,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => {
-        // Se la rete fallisce (siamo offline), cerca nella cache
-        return caches.match(event.request);
-      })
+      .catch(() => caches.match(event.request))
   );
 });
