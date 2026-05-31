@@ -1,28 +1,23 @@
 {
   "name": "Dr. Giuseppe Musumeci",
   "short_name": "Dr. Musumeci",
-  "description": "Applicazione ufficiale del Dr. Giuseppe Musumeci",
-  "start_url": "/index.html",
+  "description": "Piattaforma Sanitaria Digitale",
+  "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0056b3",
+  "background_color": "#f8fafc",
+  "theme_color": "#0d2c54",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "https://webapp.drgiuseppemusumeci.com/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "https://webapp.drgiuseppemusumeci.com/favicon.ico",
+      "src": "https://webapp.drgiuseppemusumeci.com/nosfondologo3.png",
       "sizes": "192x192",
-      "type": "image/x-icon",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://webapp.drgiuseppemusumeci.com/favicon.ico",
+      "src": "https://webapp.drgiuseppemusumeci.com/nosfondologo4.png",
       "sizes": "512x512",
-      "type": "image/x-icon",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
