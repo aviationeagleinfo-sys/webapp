@@ -1,8 +1,8 @@
-// 1. IMPORTAZIONE DI ONESIGNAL (In cima a tutto)
+// 1. IMPORTAZIONE DI ONESIGNAL
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-// 2. CONFIGURAZIONE CACHE DELLA PWA
-const CACHE_NAME = 'dr-musumeci-v2';
+// 2. CONFIGURAZIONE CACHE DELLA PWA (Incrementato la versione per forzare l'aggiornamento)
+const CACHE_NAME = 'dr-musumeci-v3';
 const ASSETS_TO_CACHE = [
   '.',
   'index.html',
@@ -10,7 +10,6 @@ const ASSETS_TO_CACHE = [
   'https://webapp.drgiuseppemusumeci.com/nosfondologo3.png'
 ];
 
-// Installazione e salvataggio iniziale in Cache
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -20,7 +19,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Attivazione e pulizia delle vecchie cache
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -35,11 +33,10 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Strategia di recupero: Prima la rete, se fallisce usa la cache
+// STRATEGIA AGGIORNATA: Network-First per evitare blocchi di codice vecchio
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Escludi le pagine dei software interni o admin dal caching
   if (url.pathname.startsWith('/software/') || url.pathname.startsWith('/admin/')) {
     return; 
   }
@@ -47,6 +44,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
+        // Se la rete risponde, aggiorna la cache e restituisci la risorsa
         if (event.request.method === 'GET' && response.status === 200) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -55,6 +53,9 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => {
+        // Se la rete è assente, cerca nella cache
+        return caches.match(event.request);
+      })
   );
 });
