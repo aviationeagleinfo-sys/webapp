@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Healthcare Staff Management</title>
-    <link class="js-meta-favicon" rel="icon" type="image/x-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="https://webapp.drgiuseppemusumeci.com/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .custom-teal { color: #0f766e; }
-        .bg-custom-teal { background-color: #0f766e; }
-    </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
 
@@ -22,173 +18,148 @@
                     <p class="text-xs text-slate-500">Gestione e Monitoraggio Personale Sanitario</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button id="btn-global-reset" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-2.5 py-1 rounded-md transition">
-                    🔄 Reset Portale
-                </button>
-                <div id="status-badge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-600">
-                    Pronto
-                </div>
+            <div class="flex items-center space-x-4">
+                <span id="status-badge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-600">Pronto</span>
+                <button id="btn-global-reset" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-2.5 py-1 rounded-md transition">🔄 Reset Portale</button>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4 py-8">
-        
         <section id="search-section" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
-            <h2 class="text-lg font-semibold mb-4 text-slate-900 flex items-center gap-2">
-                🔑 Inserisci il Codice Identificativo
-            </h2>
+            <h2 class="text-lg font-semibold mb-4 text-slate-900">🔑 Inserisci Codice</h2>
             <div class="flex flex-col sm:flex-row gap-3">
-                <input type="text" id="input-codice" placeholder="Codice Operatore o Admin..." 
-                       class="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:outline-none text-lg tracking-wider">
-                <button id="btn-accedi" class="bg-teal-700 hover:bg-teal-800 text-white font-medium px-6 py-3 rounded-xl transition duration-200 shadow-sm">
-                    Verifica Codice
-                </button>
+                <input type="text" id="input-codice" placeholder="Codice Operatore..." class="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-600 outline-none">
+                <button id="btn-accedi" class="bg-teal-700 hover:bg-teal-800 text-white font-medium px-6 py-3 rounded-xl transition">Verifica</button>
             </div>
             <p id="search-error" class="text-red-600 text-sm mt-2 hidden"></p>
         </section>
 
+        <div id="anomalie-container" class="hidden mb-6 flex flex-col gap-2"></div>
+
         <section id="employee-dashboard" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between gap-4">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2.5 py-1 rounded-md" id="emp-badge-grado">Grado</span>
-                    <h2 class="text-2xl font-bold text-slate-900 mt-2" id="emp-nome">Nome Operatore</h2>
-                    <p class="text-slate-500" id="emp-mansione">Mansione Corrente</p>
-                    <p class="text-xs text-slate-400 mt-1">Codice Documento (ID): <span id="emp-id-doc" class="font-mono"></span></p>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-2" id="emp-nome">Nome</h2>
+                    <p class="text-slate-500" id="emp-mansione">Mansione</p>
+                    <p class="text-xs text-slate-400 mt-1">ID Documento: <span id="emp-id-doc" class="font-mono"></span></p>
                 </div>
-                <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                    <button id="btn-clock-in" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">Registra Ingresso</button>
-                    <button id="btn-clock-out" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">Registra Uscita</button>
+                <div class="flex flex-col items-end justify-between gap-2">
+                    <div class="flex gap-2">
+                        <button id="btn-clock-in" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition">Ingresso</button>
+                        <button id="btn-clock-out" class="bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition">Uscita</button>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-400">Salario Attuale</p>
+                        <p id="emp-salario" class="text-lg font-bold text-slate-700">€ 0,00</p>
+                    </div>
                 </div>
             </div>
 
-            <div id="anomalie-container" class="hidden space-y-2">
-                </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
                     <div class="p-3 bg-amber-50 rounded-xl text-amber-600 text-2xl">📅</div>
                     <div>
-                        <p class="text-sm text-slate-500 font-medium">Ferie Rimanenti</p>
-                        <p class="text-xl font-bold text-slate-900" id="emp-ferie">0 Giorni</p>
+                        <p class="text-sm text-slate-500">Ferie Rimanenti</p>
+                        <p class="text-xl font-bold" id="emp-ferie">0 Giorni</p>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4">
-                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600 text-2xl">💶</div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600 text-2xl">⏱️</div>
                     <div>
-                        <p class="text-sm text-slate-500 font-medium">Salario Mensile</p>
-                        <p class="text-xl font-bold text-slate-900" id="emp-salario">€ 0.00</p>
+                        <p class="text-sm text-slate-500">Ore Totali Lavorate</p>
+                        <p class="text-xl font-bold" id="emp-ore-totali">00h 00m 00s</p>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4 border-l-4 border-l-teal-600">
-                    <div class="p-3 bg-teal-50 rounded-xl text-teal-600 text-2xl">⏱️</div>
-                    <div>
-                        <p class="text-sm text-slate-500 font-medium">Ore Totali Lavorate</p>
-                        <p class="text-lg font-bold text-slate-950 font-mono" id="emp-ore-totali">00h 00m 00s</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold mb-3">📝 Richiedi Assenza</h3>
+                <div class="flex flex-col gap-2">
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="number" id="giorni-input" placeholder="Giorni" class="w-full sm:w-24 px-3 py-2 text-sm border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="tipo-assenza" class="flex-1 px-3 py-2 text-sm border rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Ferie">Ferie</option>
+                            <option value="Permesso">Permesso</option>
+                            <option value="Altro">Altro (Specificare)</option>
+                        </select>
                     </div>
+                    <input type="text" id="motivo-input" placeholder="Specifica causa..." class="w-full px-3 py-2 text-sm border rounded-xl hidden outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button id="btn-invia-ferie" class="bg-indigo-600 text-white text-sm py-2.5 rounded-xl font-bold hover:bg-indigo-700 transition">Invia Richiesta</button>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2">🕒 Registro Ingressi / Uscite</h3>
-                    <div class="overflow-y-auto max-h-60 border border-slate-100 rounded-xl">
+                    <h3 class="text-md font-bold mb-3">🕒 Registro Ingressi / Uscite</h3>
+                    <div class="overflow-y-auto max-h-48 border border-slate-100 rounded-xl">
                         <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase border-b border-slate-100">
-                                    <th class="p-3">Evento</th>
-                                    <th class="p-3">Data e Ora</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-orari-body" class="text-sm divide-y divide-slate-100">
-                                </tbody>
+                            <tbody id="table-orari-body" class="text-sm"></tbody>
                         </table>
                     </div>
                 </div>
-
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2">📜 Storico Avanzamento & Carriera</h3>
-                    <div class="overflow-y-auto max-h-60 border border-slate-100 rounded-xl">
+                    <h3 class="text-md font-bold mb-3">📜 Storico Carriera e Variazioni</h3>
+                    <div class="overflow-y-auto max-h-48 border border-slate-100 rounded-xl">
                         <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase border-b border-slate-100">
-                                    <th class="p-3">Evento</th>
-                                    <th class="p-3">Dettagli</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-cronologia-body" class="text-sm divide-y divide-slate-100">
-                                </tbody>
+                            <tbody id="table-cronologia-body" class="text-sm"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="admin-panel" class="hidden space-y-6 bg-white p-6 rounded-2xl shadow-md border-2 border-amber-400">
-            <div class="border-b border-slate-200 pb-4 flex justify-between items-center">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-950 flex items-center gap-2">🛡️ Area Amministrativa Protetta</h2>
-                    <p class="text-xs text-slate-500">Modifica del campo "fullname" e innesto di ferie/orari/salario.</p>
-                </div>
-                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Livello Master</span>
+        <section id="admin-panel" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+                <h2 class="text-xl font-bold text-slate-900">🛠️ Pannello Amministrazione Master</h2>
+                <p class="text-xs text-slate-500">Cerca, inizializza o modifica le informazioni di qualunque operatore sanitario.</p>
             </div>
 
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Inserisci il codice operatore da gestire:</label>
-                <div class="flex gap-2">
-                    <input type="text" id="admin-target-code" placeholder="Codice documento operatore..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm">
-                    <button id="btn-admin-load" class="bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-900 transition">Carica Dati</button>
-                </div>
+            <div class="flex flex-col sm:flex-row gap-3 bg-slate-50 p-4 rounded-xl">
+                <input type="text" id="admin-target-code" placeholder="Codice Operatore da gestire..." class="flex-1 px-4 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                <button id="btn-admin-load" class="bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium px-5 py-2 rounded-xl transition">Carica Scheda</button>
             </div>
 
-            <div id="admin-form-container" class="space-y-4 opacity-50 pointer-events-none transition-opacity duration-200">
-                <h3 class="text-md font-bold text-slate-800" id="admin-form-title">Dati sul Database</h3>
+            <div id="admin-form-container" class="opacity-50 pointer-events-none transition-all duration-300 space-y-4">
+                <h3 id="admin-form-title" class="text-sm font-bold text-slate-700">Dati sul Database</h3>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome Completo (fullname)</label>
-                        <input type="text" id="adm-nome" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Nome Completo</label>
+                        <input type="text" id="adm-nome" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-600">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Giorni Ferie Rimanenti</label>
-                        <input type="number" id="adm-ferie" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Giorni Ferie Totali</label>
+                        <input type="number" id="adm-ferie" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-600">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Grado Attuale</label>
-                        <select id="adm-grado" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Livello / Grado Professionale</label>
+                        <select id="adm-grado" class="w-full px-3 py-2 border rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-teal-600">
                             <option value="OSS">OSS (Operatore Socio Sanitario)</option>
-                            <option value="Tecnico">Tecnico</option>
-                            <option value="Infermiere">Infermiere</option>
-                            <option value="Infermiere Coordinatore">Infermiere Coordinatore</option>
-                            <option value="Medico Specialista">Medico Specialista</option>
-                            <option value="Primario">Primario / Dirigente Medico</option>
+                            <option value="Infermiere">Infermiere Professionale</option>
+                            <option value="Coordinatore">Coordinatore Infermieristico</option>
+                            <option value="Medico">Medico Specialista</option>
+                            <option value="Primario">Primario / Dirigente</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mansione Specificata</label>
-                        <input type="text" id="adm-mansione" placeholder="Es. Reparto Terapia Intensiva" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Mansione Reparto</label>
+                        <input type="text" id="adm-mansione" placeholder="es. Pronto Soccorso, Terapia Intensiva..." class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-600">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Salario Mensile (€)</label>
-                        <input type="number" id="adm-salario" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Salario Base Mensile (€)</label>
+                        <input type="number" id="adm-salario" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-600">
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-2">
-                    <button id="btn-action-save" class="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg flex-1 transition">
-                        💾 Salva / Aggiorna Dati e "fullname"
-                    </button>
-                    <button id="btn-action-promote" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-                        🚀 Promuovi e Aumenta Salario (+15%)
-                    </button>
-                    <button id="btn-action-demote" class="bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-                        📉 Degrada e Riduci Salario (-10%)
-                    </button>
+                <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-100">
+                    <button id="btn-action-save" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium py-2.5 rounded-xl transition">Salva Anagrafica Standard</button>
+                    <button id="btn-action-promote" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">🚀 Promuovi (+15% Salario)</button>
+                    <button id="btn-action-demote" class="bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">⚠️ Degrada (-10% Salario)</button>
                 </div>
             </div>
         </section>
-
     </main>
 
     <script type="module">
@@ -246,6 +217,12 @@
         const btnActionPromote = document.getElementById('btn-action-promote');
         const btnActionDemote = document.getElementById('btn-action-demote');
 
+        // Elementi Gestione Ferie / Assenze
+        const tipoAssenza = document.getElementById('tipo-assenza');
+        const motivoInput = document.getElementById('motivo-input');
+        const giorniInput = document.getElementById('giorni-input');
+        const btnInviaFerie = document.getElementById('btn-invia-ferie');
+
         let currentLoadedEmployeeCode = null;
         let adminActiveTargetCode = null;
         const ADMIN_MASTER_CODE = "6669992023";
@@ -272,9 +249,71 @@
             admGrado.value = "OSS";
             admMansione.value = "";
             admSalario.value = "";
+
+            // Reset campi richiesta assenza
+            giorniInput.value = "";
+            tipoAssenza.value = "Ferie";
+            motivoInput.value = "";
+            motivoInput.classList.add('hidden');
         }
 
         btnGlobalReset.addEventListener('click', eseguiResetSchermata);
+
+        // --- LOGICA SELEZIONE TIPO ASSENZA (ALTRO) ---
+        tipoAssenza.addEventListener('change', (e) => {
+            motivoInput.classList.toggle('hidden', e.target.value !== 'Altro');
+        });
+
+        // --- INVIO RICHIESTA ASSENZA / SCALO FERIE ---
+        btnInviaFerie.addEventListener('click', async () => {
+            const giorni = parseInt(giorniInput.value);
+            const tipo = tipoAssenza.value;
+            const motivo = motivoInput.value || "Richiesta standard";
+            
+            if (!giorni || giorni <= 0 || !currentLoadedEmployeeCode) {
+                alert("Inserisci un numero di giorni valido.");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, FIRESTORE_COLLECTION, currentLoadedEmployeeCode);
+                const snap = await getDoc(docRef);
+                
+                if (!snap.exists()) {
+                    alert("Impossibile trovare il profilo dell'operatore.");
+                    return;
+                }
+
+                const data = snap.data();
+                
+                await updateDoc(docRef, {
+                    ferie: (data.ferie || 0) - giorni,
+                    cronologiaMansioni: arrayUnion({
+                        tipo: "Richiesta " + tipo,
+                        data: new Date().toLocaleString('it-IT'),
+                        mansione: motivo,
+                        grado: "Giorni scalati: " + giorni,
+                        salario: data.salario || 0
+                    })
+                });
+
+                alert("Richiesta inviata con successo!");
+                
+                // Ricarica la dashboard aggiornata direttamente senza refresh di pagina intera
+                const updatedSnap = await getDoc(docRef);
+                renderEmployeeDashboard(updatedSnap.data(), currentLoadedEmployeeCode);
+
+                // Reset dell'input ferie
+                giorniInput.value = "";
+                motivoInput.value = "";
+                motivoInput.classList.add('hidden');
+                tipoAssenza.value = "Ferie";
+
+            } catch (error) {
+                console.error("Errore durante l'invio della richiesta:", error);
+                alert("Errore nell'elaborazione della richiesta.");
+            }
+        });
 
         // --- GESTIONE CALCOLO ORE E ANOMALIE TIMBRATURE ---
         function analizzaECalcolaTempi(ingressiUscite) {
@@ -286,7 +325,6 @@
                 return { tempoFormattato: "00h 00m 00s", anomalieHtml };
             }
 
-            // Ordina i log dal più vecchio al più recente per una corretta analisi sequenziale
             const logsOrdinati = [...ingressiUscite].sort((a, b) => {
                 return convertiStringaInData(a.timestamp) - convertiStringaInData(b.timestamp);
             });
@@ -298,23 +336,19 @@
 
                 if (log.tipo === 'ingresso') {
                     if (ultimoIngressoMs !== null) {
-                        // ANOMALIA: Doppio ingresso consecutivo rilevato
                         anomalieHtml += `<div class="bg-amber-50 border border-amber-300 text-amber-800 text-xs px-4 py-2 rounded-xl">⚠️ <strong>Anomalia:</strong> Rilevato un secondo ingresso senza uscita in mezzo il ${log.timestamp}. Il blocco precedente è stato annullato.</div>`;
                     }
                     ultimoIngressoMs = logMs;
                 } else if (log.tipo === 'uscita') {
                     if (ultimoIngressoMs === null) {
-                        // ANOMALIA: Uscita senza ingresso prima
                         anomalieHtml += `<div class="bg-rose-50 border border-rose-300 text-rose-800 text-xs px-4 py-2 rounded-xl">⚠️ <strong>Anomalia:</strong> Rilevata un'uscita senza alcun ingresso precedente associato il ${log.timestamp}. Tempo ignorato.</div>`;
                     } else {
-                        // Sessione valida: calcola la differenza di tempo
                         millisecondiTotali += (logMs - ultimoIngressoMs);
-                        ultimoIngressoMs = null; // Resetta la sessione completata
+                        ultimoIngressoMs = null;
                     }
                 }
             });
 
-            // Se l'operatore è attualmente dentro (ultimo ingresso non chiuso), calcola il tempo parziale fino ad ora
             if (ultimoIngressoMs !== null) {
                 const adessoMs = new Date().getTime();
                 if (adessoMs > ultimoIngressoMs) {
@@ -322,14 +356,12 @@
                 }
             }
 
-            // Conversione matematica in Ore, Minuti e Secondi
             let secondiTotali = Math.floor(millisecondiTotali / 1000);
             let ore = Math.floor(secondiTotali / 3600);
             secondiTotali %= 3600;
             let minuti = Math.floor(secondiTotali / 60);
             let secondi = secondiTotali % 60;
 
-            // Formattazione con zero iniziale fisso (es. 02h 05m 09s)
             const oreF = String(ore).padStart(2, '0');
             const minF = String(minuti).padStart(2, '0');
             const secF = String(secondi).padStart(2, '0');
@@ -340,16 +372,14 @@
             };
         }
 
-        // Helper per convertire in modo sicuro la stringa locale "GG/MM/AAAA, OOO:MM:SS" di Firestore in oggetto Date JavaScript
         function convertiStringaInData(str) {
             try {
-                // Rileva formati standard o separati da virgola/spazi
                 const parti = str.split(/[\s,]+/);
                 const dataParti = parti[0].split('/');
                 const oraParti = parti[1].split(':');
 
                 const giorno = parseInt(dataParti[0], 10);
-                const mese = parseInt(dataParti[1], 10) - 1; // Mesi base 0 in JS
+                const mese = parseInt(dataParti[1], 10) - 1;
                 const anno = parseInt(dataParti[2], 10);
 
                 const ore = parseInt(oraParti[0], 10);
@@ -405,6 +435,8 @@
         function showError(msg) {
             searchError.textContent = msg;
             searchError.classList.remove('hidden');
+            statusBadge.textContent = "Errore";
+            statusBadge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-rose-100 text-rose-800";
         }
 
         function renderEmployeeDashboard(data, codice) {
@@ -418,7 +450,6 @@
             empFerie.textContent = `${data.ferie !== undefined ? data.ferie : 0} Giorni`;
             empSalario.textContent = `€ ${(data.salario || 0).toLocaleString('it-IT', {minimumFractionDigits: 2})}`;
 
-            // Esecuzione calcolo orari e gestione anomalie
             const analisilavoro = analizzaECalcolaTempi(data.ingressiUscite);
             empOreTotali.textContent = analisilavoro.tempoFormattato;
 
@@ -436,7 +467,7 @@
                 [...data.ingressiUscite].reverse().forEach(log => {
                     const badgeClass = log.tipo === 'ingresso' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700';
                     tableOrariBody.innerHTML += `
-                        <tr>
+                        <tr class="border-b border-slate-100">
                             <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${badgeClass}">${log.tipo.toUpperCase()}</span></td>
                             <td class="p-3 text-xs text-slate-600">${log.timestamp}</td>
                         </tr>
@@ -451,7 +482,7 @@
             if (data.cronologiaMansioni && data.cronologiaMansioni.length > 0) {
                 [...data.cronologiaMansioni].reverse().forEach(cron => {
                     tableCronologiaBody.innerHTML += `
-                        <tr class="hover:bg-slate-50">
+                        <tr class="hover:bg-slate-50 border-b border-slate-100">
                             <td class="p-3">
                                 <span class="block text-xs font-bold text-slate-700">${cron.tipo.toUpperCase()}</span>
                                 <span class="text-[10px] text-slate-400">${cron.data}</span>
@@ -459,7 +490,7 @@
                             <td class="p-3 text-xs text-slate-600">
                                 <strong>Mansione:</strong> ${cron.mansione || 'N/D'}<br>
                                 <strong>Grado:</strong> ${cron.grado || 'N/D'}<br>
-                                <strong>Salario:</strong> € ${cron.salario || 0}
+                                <strong>Salario:</strong> € ${(cron.salario || 0).toLocaleString('it-IT')}
                             </td>
                         </tr>
                     `;
@@ -469,7 +500,7 @@
             }
         }
 
-        // --- REGISTRAZIONE MOVIMENTI ---
+        // --- REGISTRAZIONE MOVIMENTI (TIMBRATURE) ---
         async function registraPresenza(tipo) {
             if (!currentLoadedEmployeeCode) return;
             const oraCorrente = new Date().toLocaleString('it-IT');
@@ -492,9 +523,7 @@
         btnClockIn.addEventListener('click', () => registraPresenza('ingresso'));
         btnClockOut.addEventListener('click', () => registraPresenza('uscita'));
 
-        // ==========================================
-        //         GESTIONE AMMINISTRATORE
-        // ==========================================
+        // --- GESTIONE AMMINISTRATORE ---
         btnAdminLoad.addEventListener('click', async () => {
             const targetCode = adminTargetCode.value.trim();
             if (!targetCode) {
@@ -572,7 +601,6 @@
         btnActionSave.addEventListener('click', () => salvaDatiAdmin('Modifica Anagrafica', 0));
         btnActionPromote.addEventListener('click', () => salvaDatiAdmin('Promozione (+15%)', 0.15));
         btnActionDemote.addEventListener('click', () => salvaDatiAdmin('Degradazione (-10%)', -0.10));
-
     </script>
 </body>
 </html>
