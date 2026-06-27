@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricettario Libera Professione - Dr. Musumeci</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Sfondo medico/soccorso sfumato per il glassmorphism */
+        body {
+            background: linear-gradient(135deg, #ffdee9 0%, #b5fffc 100%);
+            background-attachment: fixed;
+        }
+
+        /* Effetto Glassmorphism Rosso/Bianco */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(220, 38, 38, 1);
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+            outline: none;
+        }
+
+        /* Stili specifici per la stampa e la carta intestata */
+        @media print {
+            body {
+                background: white !important;
+                color: black;
+            }
+            /* Nasconde interfaccia web inutilizzabile su carta */
+            .no-print, #login-screen, button, select, .glass-panel {
+                background: none !important;
+                backdrop-filter: none !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .no-print, #login-screen, button, .input-trigger {
+                display: none !important;
+            }
+            
+            /* Il margine a 0 azzera le scritte automatiche del browser (URL, data, pagine) */
+            @page {
+                size: A4;
+                margin: 0; 
+            }
+            
+            #app-screen {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 2cm !important; /* Margini laterali di pulizia fissi */
+                max-w: 100% !important;
+            }
+
+            /* Forza la visualizzazione dei margini protettivi su OGNI pagina */
+            .print-spacer-row {
+                display: table-row !important;
+            }
+            .print-spacer-cell {
+                height: 4cm !important;
+            }
+            
+            /* Evita tassativamente che i singoli blocchi vengano troncati a metà tra due fogli */
+            .border-box {
+                border: 1.5px solid #000 !important;
+                background: none !important;
+                border-radius: 8px !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            
+            /* Assicura il rendering dei colori dei badge di urgenza */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased text-gray-800 p-4 md:p-8">
+
+    <div id="login-screen" class="flex items-center justify-center min-h-screen">
+        <div class="glass-panel p-8 rounded-2xl shadow-2xl max-w-md w-full border-t-8 border-red-600 text-center">
+            <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-600/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-black text-red-700 mb-2 tracking-wide uppercase">Area Operatori</h2>
+            <p class="text-sm text-gray-600 mb-6 font-medium">Verifica credenziali e sblocco ricettario</p>
+            
+            <div class="mb-5 text-left">
+                <label for="auth-code" class="block text-xs font-bold text-red-700 uppercase tracking-wider mb-2">Codice Identificativo Documento</label>
+                <input type="password" id="auth-code" class="w-full px-4 py-3 rounded-xl glass-input text-gray-800 font-mono text-center tracking-widest text-lg" placeholder="••••••••">
+            </div>
+            <button id="btn-login" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition duration-300 shadow-lg shadow-red-600/40 hover:scale-[1.02] cursor-pointer">
+                AUTENTICA OPERATORE
+            </button>
+            <p id="login-error" class="text-red-600 font-semibold text-sm mt-4 hidden bg-red-100/80 py-2 px-3 rounded-lg border border-red-200"></p>
+        </div>
+    </div>
+
+    <div id="app-screen" class="max-w-4xl mx-auto glass-panel p-6 md:p-10 rounded-2xl shadow-2xl hidden border-t-8 border-red-600">
+        
+        <form id="recipe-form" onsubmit="event.preventDefault();">
+            
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="hidden print-spacer-row">
+                        <td class="print-spacer-cell"></td>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="border-box p-6 border-2 border-red-100 rounded-xl mb-8 bg-white/60 shadow-sm">
+                                <div class="bg-red-600 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-md inline-block mb-4 shadow-sm">
+                                    BLOCCO 01 • ANAGRAFICA PAZIENTE
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Nome e Cognome</label>
+                                        <input type="text" required class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-medium">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Data di Nascita</label>
+                                        <input type="date" required class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-medium">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Codice Fiscale</label>
+                                        <input type="text" required class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-semibold uppercase tracking-wider" maxlength="16">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Tipo Documento</label>
+                                        <select id="doc-type" required class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-medium">
+                                            <option value="">Seleziona...</option>
+                                            <option value="tessera_militare">Tessera Militare Italiana</option>
+                                            <option value="carta_identita">Carta d'Identità UE</option>
+                                            <option value="passaporto">Passaporto Mondiale</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="doc-details-section" class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5 hidden border-t-2 border-dashed border-red-100 pt-5">
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Nazione di Emissione</label>
+                                        <input type="text" id="doc-nation" class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-medium">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Numero Documento</label>
+                                        <input type="text" id="doc-number" class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-medium">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Data di Emissione</label>
+                                        <input type="date" id="doc-issue-date" class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-medium">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Data di Scadenza</label>
+                                        <input type="date" id="doc-expiry-date" class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-medium">
+                                    </div>
+                                    
+                                    <div id="extra-foreign-fields" class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5 hidden bg-red-50/60 p-4 rounded-xl border border-red-200/60 mt-2">
+                                        <div>
+                                            <label class="block text-xs font-black text-red-800 uppercase mb-1">Comune / Ente di Emissione</label>
+                                            <input type="text" class="w-full border-b-2 border-red-300 py-1 focus:outline-none focus:border-red-600 bg-transparent text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-black text-red-800 uppercase mb-1">Titolare / Dati aggiuntivi Ente</label>
+                                            <input type="text" class="w-full border-b-2 border-red-300 py-1 focus:outline-none focus:border-red-600 bg-transparent text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-black text-red-800 uppercase mb-1">Nazionalità</label>
+                                            <input type="text" class="w-full border-b-2 border-red-300 py-1 focus:outline-none focus:border-red-600 bg-transparent text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-black text-red-800 uppercase mb-1">Cittadinanza</label>
+                                            <input type="text" class="w-full border-b-2 border-red-300 py-1 focus:outline-none focus:border-red-600 bg-transparent text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-box p-6 border-2 border-red-100 rounded-xl mb-8 bg-white/60 shadow-sm">
+                                <div class="bg-red-600 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-md inline-block mb-4 shadow-sm">
+                                    BLOCCO 02 • TIPOLOGIA PRESTAZIONE
+                                </div>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-black text-gray-500 uppercase mb-1">Seleziona Voce</label>
+                                        <select id="visit-type" required class="w-full border-b-2 border-gray-300 py-1.5 focus:outline-none focus:border-red-600 bg-transparent text-sm font-medium">
+                                            <option value="">Seleziona...</option>
+                                            <option value="Prima visita cardiologica">Prima visita cardiologica</option>
+                                            <option value="Visita cardiologica di controllo">Visita cardiologica di controllo</option>
+                                            <option value="Elettrocardiogramma (ECG)">Elettrocardiogramma (ECG)</option>
+                                            <option value="Ecocardiogramma color doppler">Ecocardiogramma color doppler</option>
+                                            <option value="altro">Altro (Digitazione manuale)...</option>
+                                        </select>
+                                    </div>
+                                    <div id="visit-custom-box" class="hidden mt-2">
+                                        <label class="block text-xs font-black text-red-600 uppercase mb-1">Specificare prestazione personalizzata</label>
+                                        <input type="text" id="visit-custom-input" class="w-full border-b-2 border-red-500 py-1.5 focus:outline-none focus:border-red-700 bg-transparent text-sm font-semibold text-gray-900" placeholder="Scrivi la prestazione specifica">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-box p-6 border-2 border-red-200 rounded-xl mb-8 bg-white shadow-md relative">
+                                <div class="flex flex-wrap justify-between items-center mb-4 border-b border-gray-100 pb-3 gap-2">
+                                    <div class="bg-red-600 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-md inline-block shadow-sm">
+                                        BLOCCO 03 • PRESCRIZIONE MEDICA
+                                    </div>
+                                    
+                                    <div class="no-print">
+                                        <select id="urgency-select" class="text-xs font-black bg-gray-50 border-2 border-gray-200 rounded-lg p-2 focus:outline-none focus:border-red-500 cursor-pointer">
+                                            <option value="">Nessun grado (Ometti urgenza)</option>
+                                            <option value="VERDE">Urgenza: VERDE</option>
+                                            <option value="GIALLO">Urgenza: GIALLO</option>
+                                            <option value="ROSSO">Urgenza: ROSSO</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="urgency-badge" class="hidden text-center font-black text-xs py-2 px-4 rounded-lg mb-4 max-w-xs uppercase tracking-widest border-2"></div>
+
+                                <div>
+                                    <textarea required rows="6" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:border-red-500 font-mono text-sm leading-relaxed bg-gray-50/50 focus:bg-white transition-colors" placeholder="Indicare farmaci, dosaggi e dettagli terapeutici..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                <div class="border-box p-5 border-2 border-red-100 rounded-xl bg-white/60 shadow-sm">
+                                    <div class="text-gray-700 text-xs font-black uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                        <span class="w-1.5 h-3 bg-red-600 rounded-sm"></span> 8) DIAGNOSI / QUESITO
+                                    </div>
+                                    <textarea rows="3" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 bg-white" placeholder="Sintomatologia o quadro clinico..."></textarea>
+                                </div>
+                                <div class="border-box p-5 border-2 border-red-100 rounded-xl bg-white/60 shadow-sm">
+                                    <div class="text-gray-700 text-xs font-black uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                        <span class="w-1.5 h-3 bg-red-600 rounded-sm"></span> 9) PROGNOSI / NOTE
+                                    </div>
+                                    <textarea rows="3" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 bg-white" placeholder="Riposo lavorativo, follow-up o tempistiche..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-end mt-12 mb-8 px-2 border-box p-4 !border-none">
+                                <div class="text-sm text-gray-700 font-bold">
+                                    Data di emissione: <span id="current-date-span" class="text-gray-900 border-b border-gray-800 pb-0.5"></span>
+                                </div>
+                                <div class="text-center border-t-2 border-gray-400 pt-1 w-52 text-xs font-black text-gray-400 uppercase tracking-wider">
+                                    Firma del Medico
+                                </div>
+                            </div>
+
+                            <div class="border-box p-4 rounded-xl border border-red-200/80 bg-red-50/40 mt-10 shadow-sm">
+                                <div class="flex flex-col sm:flex-row flex-wrap justify-around items-center gap-3 text-center text-xs text-gray-600 font-medium tracking-wide">
+                                    <div class="flex items-center gap-1">
+                                        <span class="font-black text-red-600 uppercase">Dr. Giuseppe Musumeci</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 border-t sm:border-t-0 pt-2 sm:pt-0 border-red-100 w-full sm:w-auto justify-center">
+                                        <span class="text-gray-400 font-bold">Email:</span>
+                                        <a href="mailto:info@drgiuseppemusumeci.com" class="hover:underline font-semibold text-gray-700">info@drgiuseppemusumeci.com</a>
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-center">
+                                        <span class="text-gray-400 font-bold">Sito:</span>
+                                        <a href="https://drgiuseppemusumeci.com" target="_blank" class="hover:underline font-semibold text-gray-700">drgiuseppemusumeci.com</a>
+                                    </div>
+                                    <div class="flex items-center gap-1 border-b sm:border-b-0 pb-2 sm:pb-0 border-red-100 w-full sm:w-auto justify-center">
+                                        <span class="text-gray-400 font-bold">WhatsApp:</span>
+                                        <span class="text-emerald-600 font-bold tracking-normal">+39 011 3329510</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </td>
+                    </tr>
+                </tbody>
+                
+                <tfoot>
+                    <tr class="hidden print-spacer-row">
+                        <td class="print-spacer-cell"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="no-print flex justify-end gap-4 mt-8 border-t border-gray-200 pt-5">
+                <button type="button" onclick="window.print()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-red-600/30 transition duration-200 flex items-center gap-2 cursor-pointer hover:scale-[1.01]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                    Stampa / Esporta in PDF
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // Configurazione Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYcwhZdpOkNOJwt_2oIBGIDED4y7fVVm0",
+            authDomain: "staff-operatori-mg.firebaseapp.com",
+            projectId: "staff-operatori-mg",
+            storageBucket: "staff-operatori-mg.firebasestorage.app",
+            messagingSenderId: "797244866930",
+            appId: "1:797244866930:web:b93ca19a318711f8b89deb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen = document.getElementById('app-screen');
+        const btnLogin = document.getElementById('btn-login');
+        const authCodeInput = document.getElementById('auth-code');
+        const loginError = document.getElementById('login-error');
+
+        btnLogin.addEventListener('click', async () => {
+            const documentId = authCodeInput.value.trim();
+            if (!documentId) {
+                showError("Inserire il numero di documento identificativo.");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "operatori", documentId); 
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.name && data.name.trim() !== "") {
+                        loginScreen.classList.add('hidden');
+                        appScreen.classList.remove('hidden');
+                        initAppForm();
+                    } else {
+                        showError("Accesso negato: Campo 'name' vuoto o non configurato.");
+                    }
+                } else {
+                    showError("Operatore non censito. Documento inesistente.");
+                }
+            } catch (error) {
+                console.error("Errore di connessione: ", error);
+                showError("Errore di rete durante la verifica.");
+            }
+        });
+
+        function showError(msg) {
+            loginError.textContent = msg;
+            loginError.classList.remove('hidden');
+        }
+
+        function initAppForm() {
+            document.getElementById('current-date-span').textContent = new Date().toLocaleDateString('it-IT');
+
+            const docTypeSelect = document.getElementById('doc-type');
+            const docDetailsSection = document.getElementById('doc-details-section');
+            const extraForeignFields = document.getElementById('extra-foreign-fields');
+            const docNationInput = document.getElementById('doc-nation');
+
+            docTypeSelect.addEventListener('change', (e) => {
+                const val = e.target.value;
+                if(val === "") {
+                    docDetailsSection.classList.add('hidden');
+                    return;
+                }
+                
+                docDetailsSection.classList.remove('hidden');
+
+                if(val === 'tessera_militare') {
+                    docNationInput.value = "Italia";
+                    docNationInput.readOnly = true;
+                    extraForeignFields.classList.add('hidden');
+                    toggleRequiredFields(extraForeignFields, false);
+                } else {
+                    docNationInput.value = "";
+                    docNationInput.readOnly = false;
+                    docNationInput.placeholder = val === 'carta_identita' ? "Es. Francia, Spagna" : "Nazione di rilascio";
+                    docNationInput.addEventListener('input', checkNation);
+                }
+            });
+
+            function checkNation() {
+                const nation = docNationInput.value.trim().toLowerCase();
+                if(nation !== "italia" && nation !== "") {
+                    extraForeignFields.classList.remove('hidden');
+                    toggleRequiredFields(extraForeignFields, true);
+                } else {
+                    extraForeignFields.classList.add('hidden');
+                    toggleRequiredFields(extraForeignFields, false);
+                }
+            }
+
+            function toggleRequiredFields(container, isRequired) {
+                const fields = container.querySelectorAll('input');
+                fields.forEach(f => {
+                    if (isRequired) f.setAttribute('required', 'true');
+                    else f.removeAttribute('required');
+                });
+            }
+
+            const visitTypeSelect = document.getElementById('visit-type');
+            const visitCustomBox = document.getElementById('visit-custom-box');
+            const visitCustomInput = document.getElementById('visit-custom-input');
+
+            visitTypeSelect.addEventListener('change', (e) => {
+                if(e.target.value === 'altro') {
+                    visitCustomBox.classList.remove('hidden');
+                    visitCustomInput.setAttribute('required', 'true');
+                } else {
+                    visitCustomBox.classList.add('hidden');
+                    visitCustomInput.removeAttribute('required');
+                    visitCustomInput.value = "";
+                }
+            });
+
+            const urgencySelect = document.getElementById('urgency-select');
+            const urgencyBadge = document.getElementById('urgency-badge');
+
+            urgencySelect.addEventListener('change', (e) => {
+                const val = e.target.value;
+                urgencyBadge.className = "text-center font-black text-xs py-2 px-4 rounded-lg mb-4 max-w-xs uppercase tracking-widest border-2 ";
+                
+                if(val === "VERDE") {
+                    urgencyBadge.classList.remove('hidden');
+                    urgencyBadge.classList.add('bg-green-50', 'text-green-700', 'border-green-300');
+                    urgencyBadge.textContent = "Grado Urgenza: Verde";
+                } else if(val === "GIALLO") {
+                    urgencyBadge.classList.remove('hidden');
+                    urgencyBadge.classList.add('bg-yellow-50', 'text-yellow-700', 'border-yellow-300');
+                    urgencyBadge.textContent = "Grado Urgenza: Giallo";
+                } else if(val === "ROSSO") {
+                    urgencyBadge.classList.remove('hidden');
+                    urgencyBadge.classList.add('bg-red-50', 'text-red-700', 'border-red-300');
+                    urgencyBadge.textContent = "Grado Urgenza: Rosso";
+                } else {
+                    urgencyBadge.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
