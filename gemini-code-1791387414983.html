@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ticket Visita - Dr. Giuseppe Musumeci</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Libreria QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Roboto+Mono:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root { 
+            --primary: #0284c7;
+            --secondary: #0f172a;
+            --bg: #0b1329; 
+            --text: #1e293b; 
+        }
+        
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: white; 
+            min-height: 100vh;
+        }
+
+        .card { 
+            background: rgba(255, 255, 255, 0.98); 
+            color: var(--text); 
+            border-radius: 24px; 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6); 
+        }
+
+        .thermal-paper {
+            background-color: #ffffff;
+            color: #000000;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between items-center min-h-screen p-4 sm:p-6 relative">
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2 pointer-events-none"></div>
+
+    <header class="w-full max-w-xl flex items-center justify-between py-3.5 px-5 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl mb-6 shadow-xl">
+        <div class="flex items-center space-x-3">
+            <div class="bg-sky-600 text-white font-black px-3 py-1 rounded-xl text-sm tracking-wider shadow-md shadow-sky-600/30">
+                GM
+            </div>
+            <div>
+                <h1 class="text-sm font-extrabold text-white tracking-wide">DR. GIUSEPPE MUSUMECI</h1>
+                <p class="text-[10px] text-slate-400 font-medium">Cardiologia & Emodinamica • Ticket System M110</p>
+            </div>
+        </div>
+
+        <!-- Connection Badge -->
+        <div id="phomemoStatusBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span class="w-2 h-2 mr-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            M110 Non Connessa
+        </div>
+    </header>
+
+    <main class="w-full max-w-lg my-auto">
+
+        <!-- FORM INSERIMENTO VISITA -->
+        <div id="form-container" class="card p-6 sm:p-8 space-y-5">
+            <div class="text-center border-b border-slate-200 pb-4">
+                <h2 class="text-2xl font-black text-sky-700 tracking-tight">Emissione Ticket Visita</h2>
+                <p class="text-xs text-slate-500 mt-1">Compila i dati del paziente e le prestazioni erogate</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- NOME PAZIENTE -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome e Cognome Paziente *</label>
+                    <input type="text" id="paziente" placeholder="Es. Mario Rossi" required 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl text-slate-900 font-semibold text-sm focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20 transition">
+                </div>
+
+                <!-- CODICE E TIPOLOGIA VISITA -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipo Triage / Visita *</label>
+                        <select id="tipoCodice" onchange="aggiornaPrefisso()"
+                            class="w-full px-3 py-3 border border-slate-300 rounded-xl text-slate-900 font-semibold text-xs focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20 transition">
+                            <option value="B" data-nome="Codice Blu - Prima Visita">Codice Blu (Prima Visita)</option>
+                            <option value="V" data-nome="Codice Verde - Visita Controllo">Codice Verde (Controllo)</option>
+                            <option value="G" data-nome="Codice Giallo - Follow-Up Terapie">Codice Giallo (Follow-Up)</option>
+                            <option value="R" data-nome="Codice Rosso - Pre-Intervento">Codice Rosso (Pre-Intervento)</option>
+                            <option value="P" data-nome="Codice Viola - Interventistica">Codice Viola (Interventistica)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Numero *</label>
+                        <div class="relative flex items-center">
+                            <span id="prefissoDisplay" class="absolute left-3 text-sm font-black text-sky-700">B</span>
+                            <input type="number" id="numeroCodice" placeholder="54" min="1" max="999" required
+                                class="w-full pl-8 pr-3 py-3 border border-slate-300 rounded-xl text-slate-900 font-bold text-sm focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-600/20 transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRESTAZIONI CARDIOLOGICHE SELEZIONABILI -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Prestazioni Eseguite *</label>
+                    <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        
+                        <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox" name="prestazione" value="Visita Completa" checked class="mt-0.5 w-4 h-4 text-sky-600 rounded">
+                            <div class="text-xs">
+                                <span class="font-bold text-slate-900 block">Visita Completa</span>
+                                <span class="text-[10px] text-slate-500 block leading-tight">Anamnesi, esame obiettivo, fattori di rischio e inquadramento.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox" name="prestazione" value="Elettrocardiogramma (ECG)" checked class="mt-0.5 w-4 h-4 text-sky-600 rounded">
+                            <div class="text-xs">
+                                <span class="font-bold text-slate-900 block">Elettrocardiogramma (ECG)</span>
+                                <span class="text-[10px] text-slate-500 block leading-tight">Ritmo e attività elettrica per aritmie o sofferenze ischemiche.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox" name="prestazione" value="Ecocardiogramma Color Doppler" class="mt-0.5 w-4 h-4 text-sky-600 rounded">
+                            <div class="text-xs">
+                                <span class="font-bold text-slate-900 block">Ecocardiogramma Color Doppler</span>
+                                <span class="text-[10px] text-slate-500 block leading-tight">Morfologia camere cardiache, contrattilità e dinamica valvolare.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox" name="prestazione" value="Visita Preparatoria Pre-Intervento" class="mt-0.5 w-4 h-4 text-sky-600 rounded">
+                            <div class="text-xs">
+                                <span class="font-bold text-slate-900 block">Visita Preparatoria Pre-Intervento</span>
+                                <span class="text-[10px] text-slate-500 block leading-tight">Stratificazione del rischio operatorio e cardiologico.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox" name="prestazione" value="Follow-Up Terapie" class="mt-0.5 w-4 h-4 text-sky-600 rounded">
+                            <div class="text-xs">
+                                <span class="font-bold text-slate-900 block">Follow-Up Terapie</span>
+                                <span class="text-[10px] text-slate-500 block leading-tight">Monitoraggio dello scompenso, ipertensione, stent/angioplastica.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-2.5 p-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                            <input type="checkbox" name="prestazione" value="Inquadramento Interventistico" class="mt-0.5 w-4 h-4 text-sky-600 rounded">
+                            <div class="text-xs">
+                                <span class="font-bold text-slate-900 block">Inquadramento Interventistico</span>
+                                <span class="text-[10px] text-slate-500 block leading-tight">Consulenza II livello per TAVI, MitraClip, Angioplastica, PFO.</span>
+                            </div>
+                        </label>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- HARDWARE CONNECTORS PHOMEMO M110 -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider">
+                        Connessione Phomemo M110 (50mm)
+                    </span>
+                    <span class="text-[10px] bg-slate-200 text-slate-700 font-bold px-1.5 py-0.5 rounded">Rotolo Continuo</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="connectPhomemoUSB()" 
+                        class="px-3 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-md">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                        USB Serial
+                    </button>
+                    <button type="button" onclick="connectPhomemoBLE()" 
+                        class="px-3 py-2.5 bg-sky-700 hover:bg-sky-600 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-md">
+                        <svg class="w-4 h-4 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071a10 10 0 0114.142 0M1.414 8.414a16 16 0 0122.628 0"></path></svg>
+                        Bluetooth BLE
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button id="btnInvia" onclick="generaETicket()" 
+                class="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white font-black text-base rounded-xl transition shadow-lg shadow-sky-600/30 uppercase tracking-wider">
+                GENERA TICKET VISITA
+            </button>
+        </div>
+
+        <!-- SCHERMATA ANTEPRIMA E STAMPA -->
+        <div id="success-container" class="card p-6 sm:p-8 space-y-5 hidden text-center">
+            <div>
+                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl font-black">
+                    ✓
+                </div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Ticket Pronto!</h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Anteprima scontrino termico per Phomemo M110
+                </p>
+            </div>
+
+            <!-- ANTEPRIMA CANVAS PHOMEMO -->
+            <div class="bg-slate-100 p-3.5 rounded-2xl border border-slate-200 flex flex-col items-center">
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2">
+                    Anteprima Stampa Alta Definizione (384 px)
+                </span>
+                <div class="thermal-paper p-1.5 max-h-[360px] overflow-y-auto rounded-lg">
+                    <canvas id="receiptCanvas" width="384" height="720" class="w-[240px] h-auto block bg-white rounded"></canvas>
+                </div>
+            </div>
+
+            <!-- PROGRESS BAR STAMPA -->
+            <div id="progressBox" class="hidden space-y-1.5 text-left">
+                <div class="flex justify-between text-xs font-bold text-slate-700">
+                    <span id="progressStatus">Trasmissione dati alla Phomemo...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                    <div id="progressBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-150" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- PULSANTI AZIONE -->
+            <div class="space-y-2.5">
+                <button onclick="stampaPhomemoDirect()" id="btnPhomemoPrint"
+                    class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    STAMPA SU PHOMEMO M110 (50mm)
+                </button>
+
+                <button onclick="resetForm()" 
+                    class="w-full py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs uppercase tracking-wider rounded-xl transition">
+                    NUOVO PAZIENTE
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let printerType = null;
+        let serialPort = null;
+        let serialWriter = null;
+        let bleDevice = null;
+        let bleCharacteristic = null;
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgColors = 'bg-slate-900 border-slate-700 text-white';
+            if (type === 'error') bgColors = 'bg-rose-600 border-rose-500 text-white';
+            if (type === 'success') bgColors = 'bg-emerald-600 border-emerald-500 text-white';
+            if (type === 'warning') bgColors = 'bg-amber-500 border-amber-400 text-slate-950';
+
+            toast.className = `p-3.5 rounded-xl border shadow-2xl text-xs font-bold transition-all duration-300 transform translate-y-[-10px] opacity-0 flex items-center justify-between ${bgColors} pointer-events-auto`;
+            toast.innerHTML = `<span>${message}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => { toast.classList.remove('translate-y-[-10px]', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function aggiornaPrefisso() {
+            const select = document.getElementById('tipoCodice');
+            document.getElementById('prefissoDisplay').innerText = select.value;
+        }
+
+        async function connectPhomemoUSB() {
+            if (!('serial' in navigator)) {
+                showToast("Web Serial API non supportata da questo browser (usa Chrome/Edge).", "error");
+                return;
+            }
+            try {
+                serialPort = await navigator.serial.requestPort();
+                await serialPort.open({ baudRate: 115200 });
+                serialWriter = serialPort.writable.getWriter();
+                printerType = 'serial';
+                updatePrinterStatusBadge(true, "USB Serial");
+                showToast("Stampante Phomemo M110 connessa via USB Serial!", "success");
+            } catch (err) {
+                console.error("Errore USB:", err);
+                showToast("Connessione USB fallita: " + err.message, "error");
+            }
+        }
+
+        async function connectPhomemoBLE() {
+            if (!('bluetooth' in navigator)) {
+                showToast("Web Bluetooth API non supportata.", "error");
+                return;
+            }
+            try {
+                bleDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: [
+                        '0000ff00-0000-1000-8000-00805f9b34fb',
+                        '0000e701-0000-1000-8000-00805f9b34fb',
+                        0xFF00, 0xE701
+                    ]
+                });
+
+                const server = await bleDevice.gatt.connect();
+                let service = null;
+
+                try {
+                    service = await server.getPrimaryService('0000ff00-0000-1000-8000-00805f9b34fb');
+                } catch(e) {
+                    service = await server.getPrimaryService(0xFF00);
+                }
+
+                try {
+                    bleCharacteristic = await service.getCharacteristic('0000ff02-0000-1000-8000-00805f9b34fb');
+                } catch(e) {
+                    bleCharacteristic = await service.getCharacteristic(0xFF02);
+                }
+
+                printerType = 'ble';
+                updatePrinterStatusBadge(true, "BLE " + (bleDevice.name || "M110"));
+                showToast("Stampante Phomemo M110 connessa via Bluetooth!", "success");
+            } catch (err) {
+                console.error("Errore BLE:", err);
+                showToast("Connessione Bluetooth fallita: " + err.message, "error");
+            }
+        }
+
+        function updatePrinterStatusBadge(connected, name = "") {
+            const badge = document.getElementById('phomemoStatusBadge');
+            if (connected) {
+                badge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                badge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-400"></span> Phomemo (${name})`;
+            } else {
+                badge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                badge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-amber-500 animate-pulse"></span> M110 Non Connessa`;
+            }
+        }
+
+        function generaETicket() {
+            const paziente = document.getElementById('paziente').value.trim();
+            const prefisso = document.getElementById('tipoCodice').value;
+            const numero = document.getElementById('numeroCodice').value.trim();
+            const selectEl = document.getElementById('tipoCodice');
+            const nomeTriage = selectEl.options[selectEl.selectedIndex].getAttribute('data-nome');
+
+            if (!paziente || !numero) {
+                showToast("Compila sia il nome del paziente che il numero di visita.", "error");
+                return;
+            }
+
+            const codiceCompleto = `${prefisso}${numero}`;
+
+            const prestazioniChecked = Array.from(document.querySelectorAll('input[name="prestazione"]:checked'))
+                .map(cb => cb.value);
+
+            if (prestazioniChecked.length === 0) {
+                showToast("Seleziona almeno una prestazione erogata.", "error");
+                return;
+            }
+
+            drawPhomemoCanvas(paziente, codiceCompleto, nomeTriage, prestazioniChecked);
+
+            document.getElementById('form-container').classList.add('hidden');
+            document.getElementById('success-container').classList.remove('hidden');
+
+            if (printerType) {
+                setTimeout(stampaPhomemoDirect, 500);
+            }
+        }
+
+        function drawPhomemoCanvas(paziente, codiceVisita, nomeTriage, prestazioni) {
+            const canvas = document.getElementById('receiptCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = 384;  // 48mm @ 203 DPI
+
+            // Calcolo dinamico dell'altezza per distanziare perfettamente gli elementi
+            const baseHeight = 520;
+            const dynamicHeight = baseHeight + (prestazioni.length * 24);
+            const height = Math.max(720, dynamicHeight);
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // Disabilita smoothing per la massima nitidezza sui margini del testo
+            ctx.imageSmoothingEnabled = false;
+
+            // Sfondo Bianco
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#000000';
+            ctx.strokeStyle = '#000000';
+
+            // 1. INTESTAZIONE MEDICA (Cornice ad alta nitidezza senza riempimento nero smussato)
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(16, 16, width - 32, 58);
+            
+            ctx.font = '900 20px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('DR. GIUSEPPE MUSUMECI', width / 2, 42);
+            ctx.font = '700 11px "Inter", sans-serif';
+            ctx.fillText('CARDIOLOGIA & EMODINAMICA', width / 2, 60);
+
+            // Sottotitolo
+            ctx.font = '700 12px "Roboto Mono", monospace';
+            ctx.fillText('TICKET DI FINE VISITA', width / 2, 98);
+
+            drawDashedLine(ctx, 114, width);
+
+            // 2. SEZIONE PAZIENTE (Testo grande e nitido)
+            ctx.font = '700 11px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('PAZIENTE:', 20, 136);
+
+            ctx.font = '900 22px "Inter", sans-serif';
+            let nomeUpper = paziente.toUpperCase();
+            if (nomeUpper.length > 18) nomeUpper = nomeUpper.substring(0, 16) + '..';
+            ctx.fillText(nomeUpper, 20, 164);
+
+            drawDashedLine(ctx, 180, width);
+
+            // 3. BOX CODICE VISITA (Bordo definito, testo ingrandito a 44px)
+            const boxY = 196;
+            const boxHeight = 88;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(20, boxY, width - 40, boxHeight);
+
+            ctx.font = '700 13px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(nomeTriage.toUpperCase(), width / 2, boxY + 28);
+
+            ctx.font = '900 44px "Roboto Mono", monospace';
+            ctx.fillText(codiceVisita, width / 2, boxY + 72);
+
+            const nextY = boxY + boxHeight + 20;
+            drawDashedLine(ctx, nextY, width);
+
+            // 4. PRESTAZIONI CARDIOLOGICHE (Testo ingrandito e righe spaziate)
+            let yPos = nextY + 28;
+            ctx.font = '900 13px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('PRESTAZIONI CARDIOLOGICHE:', 20, yPos);
+
+            yPos += 26;
+            ctx.font = '600 12px "Inter", sans-serif';
+            prestazioni.forEach(p => {
+                ctx.fillText(`•  ${p}`, 22, yPos);
+                yPos += 24;
+            });
+
+            drawDashedLine(ctx, yPos + 8, width);
+
+            // 5. QR CODE E FOOTER CON DATA
+            const qrY = yPos + 22;
+            const tempQrDiv = document.createElement('div');
+            const dataOraStr = new Date().toLocaleString('it-IT');
+
+            new QRCode(tempQrDiv, {
+                text: `MUSUMECI|${codiceVisita}|${paziente}|${dataOraStr}`,
+                width: 140,
+                height: 140,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            setTimeout(() => {
+                const qrImg = tempQrDiv.querySelector('img') || tempQrDiv.querySelector('canvas');
+                if (qrImg) {
+                    ctx.drawImage(qrImg, (width - 140) / 2, qrY);
+                }
+
+                const footerY = qrY + 162;
+                ctx.fillStyle = '#000000';
+                ctx.font = '700 12px "Roboto Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(`DATA: ${dataOraStr}`, width / 2, footerY);
+                
+                ctx.font = '700 11px "Inter", sans-serif';
+                ctx.fillText('Conservare per il controllo successivo', width / 2, footerY + 20);
+            }, 100);
+        }
+
+        function drawDashedLine(ctx, y, width) {
+            ctx.beginPath();
+            ctx.setLineDash([4, 3]);
+            ctx.moveTo(20, y);
+            ctx.lineTo(width - 20, y);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1.0;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function buildPhomemoRasterPacket() {
+            const canvas = document.getElementById('receiptCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = 384;
+            const height = canvas.height;
+
+            const bytesPerLine = width / 8; // 48 bytes
+            const rasterSize = bytesPerLine * height;
+            const rasterBuffer = new Uint8Array(rasterSize);
+
+            const imgData = ctx.getImageData(0, 0, width, height);
+            const pixels = imgData.data;
+
+            let bufIdx = 0;
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x += 8) {
+                    let byteVal = 0;
+                    for (let bit = 0; bit < 8; bit++) {
+                        const pxIdx = ((y * width) + (x + bit)) * 4;
+                        const r = pixels[pxIdx];
+                        const g = pixels[pxIdx + 1];
+                        const b = pixels[pxIdx + 2];
+                        const lum = (0.299 * r + 0.587 * g + 0.114 * b);
+
+                        if (lum < 180) { // Soglia ottimizzata per binarizzazione termica pulita
+                            byteVal |= (0x80 >> bit);
+                        }
+                    }
+                    rasterBuffer[bufIdx++] = byteVal;
+                }
+            }
+
+            const commands = [];
+            commands.push(new Uint8Array([0x1B, 0x40])); // Reset
+            commands.push(new Uint8Array([0x1F, 0x11, 0x0B])); // Continuo
+            commands.push(new Uint8Array([0x1B, 0x4E, 0x04, 0x0F])); // Densità di stampa bilanciata
+            commands.push(new Uint8Array([0x1B, 0x33, 0x00])); // Line Spacing 0
+
+            const xL = bytesPerLine & 0xFF;        // 48
+            const xH = (bytesPerLine >> 8) & 0xFF; // 0
+            const yL = height & 0xFF;              
+            const yH = (height >> 8) & 0xFF;       
+
+            const gsHeader = new Uint8Array([0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH]);
+            commands.push(gsHeader);
+            commands.push(rasterBuffer);
+
+            commands.push(new Uint8Array([0x1B, 0x64, 0x04])); // Feed 4 righe
+            commands.push(new Uint8Array([0x1F, 0xF0, 0x05, 0x00, 0x1F, 0xF0, 0x03, 0x00])); // Stop Phomemo
+            commands.push(new Uint8Array([0x1B, 0x40]));
+
+            const totalLen = commands.reduce((acc, c) => acc + c.length, 0);
+            const fullPacket = new Uint8Array(totalLen);
+            let offset = 0;
+            for (const cmd of commands) {
+                fullPacket.set(cmd, offset);
+                offset += cmd.length;
+            }
+
+            return fullPacket;
+        }
+
+        async function stampaPhomemoDirect() {
+            if (!printerType) {
+                if ('serial' in navigator) {
+                    await connectPhomemoUSB();
+                } else if ('bluetooth' in navigator) {
+                    await connectPhomemoBLE();
+                }
+            }
+
+            if (!printerType) {
+                showToast("Connetti prima la Phomemo M110 via USB o Bluetooth.", "warning");
+                return;
+            }
+
+            const progressBox = document.getElementById('progressBox');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressStatus = document.getElementById('progressStatus');
+
+            progressBox.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressPercent.innerText = '0%';
+            progressStatus.innerText = 'Invio ticket alla stampante...';
+
+            try {
+                const packet = buildPhomemoRasterPacket();
+                const totalBytes = packet.length;
+                let bytesSent = 0;
+
+                if (printerType === 'serial' && serialWriter) {
+                    const CHUNK_SIZE = 256;
+                    for (let i = 0; i < totalBytes; i += CHUNK_SIZE) {
+                        const chunk = packet.subarray(i, i + CHUNK_SIZE);
+                        await serialWriter.write(chunk);
+                        bytesSent += chunk.length;
+
+                        const percent = Math.min(100, Math.round((bytesSent / totalBytes) * 100));
+                        progressBar.style.width = `${percent}%`;
+                        progressPercent.innerText = `${percent}%`;
+
+                        await new Promise(r => setTimeout(r, 15));
+                    }
+                } else if (printerType === 'ble' && bleCharacteristic) {
+                    const CHUNK_SIZE = 128;
+                    for (let i = 0; i < totalBytes; i += CHUNK_SIZE) {
+                        const chunk = packet.subarray(i, i + CHUNK_SIZE);
+                        await bleCharacteristic.writeValue(chunk);
+                        bytesSent += chunk.length;
+
+                        const percent = Math.min(100, Math.round((bytesSent / totalBytes) * 100));
+                        progressBar.style.width = `${percent}%`;
+                        progressPercent.innerText = `${percent}%`;
+
+                        await new Promise(r => setTimeout(r, 18));
+                    }
+                }
+
+                progressStatus.innerText = 'Stampa completata con successo!';
+                showToast("Ticket stampato con successo!", "success");
+
+                setTimeout(() => { progressBox.classList.add('hidden'); }, 3000);
+
+            } catch (err) {
+                console.error("Errore di stampa:", err);
+                progressStatus.innerText = 'Errore durante la stampa.';
+                showToast("Errore di stampa: " + err.message, "error");
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('paziente').value = '';
+            document.getElementById('numeroCodice').value = '';
+            document.getElementById('success-container').classList.add('hidden');
+            document.getElementById('form-container').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
