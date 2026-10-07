@@ -408,21 +408,21 @@
             ctx.font = '900 20px "Inter", sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('DR. GIUSEPPE MUSUMECI', width / 2, 42);
-            ctx.font = '700 11px "Inter", sans-serif';
+            ctx.font = '700 15px "Inter", sans-serif';
             ctx.fillText('CARDIOLOGIA & EMODINAMICA', width / 2, 60);
 
             // Sottotitolo
-            ctx.font = '700 12px "Roboto Mono", monospace';
+            ctx.font = '700 16px "Roboto Mono", monospace';
             ctx.fillText('TICKET DI FINE VISITA', width / 2, 98);
 
             drawDashedLine(ctx, 114, width);
 
             // 2. SEZIONE PAZIENTE (Testo grande e nitido)
-            ctx.font = '700 11px "Inter", sans-serif';
+            ctx.font = '700 15px "Inter", sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText('PAZIENTE:', 20, 136);
 
-            ctx.font = '900 22px "Inter", sans-serif';
+            ctx.font = '700 22px "Inter", sans-serif';
             let nomeUpper = paziente.toUpperCase();
             if (nomeUpper.length > 18) nomeUpper = nomeUpper.substring(0, 16) + '..';
             ctx.fillText(nomeUpper, 20, 164);
@@ -435,11 +435,11 @@
             ctx.lineWidth = 2;
             ctx.strokeRect(20, boxY, width - 40, boxHeight);
 
-            ctx.font = '700 13px "Inter", sans-serif';
+            ctx.font = '700 17px "Inter", sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(nomeTriage.toUpperCase(), width / 2, boxY + 28);
 
-            ctx.font = '900 44px "Roboto Mono", monospace';
+            ctx.font = '900 64px "Roboto Mono", monospace';
             ctx.fillText(codiceVisita, width / 2, boxY + 72);
 
             const nextY = boxY + boxHeight + 20;
@@ -447,12 +447,12 @@
 
             // 4. PRESTAZIONI CARDIOLOGICHE (Testo ingrandito e righe spaziate)
             let yPos = nextY + 28;
-            ctx.font = '900 13px "Inter", sans-serif';
+            ctx.font = '900 17px "Inter", sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText('PRESTAZIONI CARDIOLOGICHE:', 20, yPos);
 
             yPos += 26;
-            ctx.font = '600 12px "Inter", sans-serif';
+            ctx.font = '600 16px "Inter", sans-serif';
             prestazioni.forEach(p => {
                 ctx.fillText(`•  ${p}`, 22, yPos);
                 yPos += 24;
@@ -482,11 +482,11 @@
 
                 const footerY = qrY + 162;
                 ctx.fillStyle = '#000000';
-                ctx.font = '700 12px "Roboto Mono", monospace';
+                ctx.font = '700 16px "Roboto Mono", monospace';
                 ctx.textAlign = 'center';
                 ctx.fillText(`DATA: ${dataOraStr}`, width / 2, footerY);
                 
-                ctx.font = '700 11px "Inter", sans-serif';
+                ctx.font = '700 15px "Inter", sans-serif';
                 ctx.fillText('Conservare per il controllo successivo', width / 2, footerY + 20);
             }, 100);
         }
