@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valutazione Servizio - Dr. Giuseppe Musumeci</title>
+  
+  <!-- Font Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background: var(--card-bg);
+      max-width: 680px;
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      padding: 40px;
+      border: 1px solid var(--border);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .rating-group {
+      margin-bottom: 28px;
+    }
+
+    .rating-label {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .rating-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+
+    .scale-container {
+      display: flex;
+      gap: 6px;
+      justify-content: space-between;
+    }
+
+    .scale-btn {
+      flex: 1;
+      height: 42px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .scale-btn:hover {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .scale-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+
+    .emoji-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .emoji-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      border-radius: 12px;
+      font-size: 22px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .emoji-btn:hover {
+      transform: translateY(-2px);
+      background: #e2e8f0;
+    }
+
+    .emoji-btn.active {
+      background: #e0f2fe;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .note-text {
+      font-size: 12px;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .success-msg {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .success-msg h2 {
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="form-content">
+      <div class="header">
+        <h1>Dr. Giuseppe Musumeci</h1>
+        <p>Valutazione dell'esperienza e del servizio medico ricevuto</p>
+      </div>
+
+      <form id="reviewForm">
+        
+        <!-- Gentilezza -->
+        <div class="rating-group">
+          <div class="rating-label">Gentilezza del Medico</div>
+          <div class="scale-container" data-category="gentilezza">
+            <button type="button" class="scale-btn" data-val="1">1</button>
+            <button type="button" class="scale-btn" data-val="2">2</button>
+            <button type="button" class="scale-btn" data-val="3">3</button>
+            <button type="button" class="scale-btn" data-val="4">4</button>
+            <button type="button" class="scale-btn" data-val="5">5</button>
+            <button type="button" class="scale-btn" data-val="6">6</button>
+            <button type="button" class="scale-btn" data-val="7">7</button>
+            <button type="button" class="scale-btn" data-val="8">8</button>
+            <button type="button" class="scale-btn" data-val="9">9</button>
+            <button type="button" class="scale-btn" data-val="10">10</button>
+          </div>
+        </div>
+
+        <!-- Serietà -->
+        <div class="rating-group">
+          <div class="rating-label">Serietà</div>
+          <div class="scale-container" data-category="serietà">
+            <button type="button" class="scale-btn" data-val="1">1</button>
+            <button type="button" class="scale-btn" data-val="2">2</button>
+            <button type="button" class="scale-btn" data-val="3">3</button>
+            <button type="button" class="scale-btn" data-val="4">4</button>
+            <button type="button" class="scale-btn" data-val="5">5</button>
+            <button type="button" class="scale-btn" data-val="6">6</button>
+            <button type="button" class="scale-btn" data-val="7">7</button>
+            <button type="button" class="scale-btn" data-val="8">8</button>
+            <button type="button" class="scale-btn" data-val="9">9</button>
+            <button type="button" class="scale-btn" data-val="10">10</button>
+          </div>
+        </div>
+
+        <!-- Professionalità -->
+        <div class="rating-group">
+          <div class="rating-label">Professionalità</div>
+          <div class="scale-container" data-category="professionalità">
+            <button type="button" class="scale-btn" data-val="1">1</button>
+            <button type="button" class="scale-btn" data-val="2">2</button>
+            <button type="button" class="scale-btn" data-val="3">3</button>
+            <button type="button" class="scale-btn" data-val="4">4</button>
+            <button type="button" class="scale-btn" data-val="5">5</button>
+            <button type="button" class="scale-btn" data-val="6">6</button>
+            <button type="button" class="scale-btn" data-val="7">7</button>
+            <button type="button" class="scale-btn" data-val="8">8</button>
+            <button type="button" class="scale-btn" data-val="9">9</button>
+            <button type="button" class="scale-btn" data-val="10">10</button>
+          </div>
+        </div>
+
+        <!-- Terapia -->
+        <div class="rating-group">
+          <div class="rating-label">Efficacia della Terapia</div>
+          <div class="scale-container" data-category="terapia">
+            <button type="button" class="scale-btn" data-val="1">1</button>
+            <button type="button" class="scale-btn" data-val="2">2</button>
+            <button type="button" class="scale-btn" data-val="3">3</button>
+            <button type="button" class="scale-btn" data-val="4">4</button>
+            <button type="button" class="scale-btn" data-val="5">5</button>
+            <button type="button" class="scale-btn" data-val="6">6</button>
+            <button type="button" class="scale-btn" data-val="7">7</button>
+            <button type="button" class="scale-btn" data-val="8">8</button>
+            <button type="button" class="scale-btn" data-val="9">9</button>
+            <button type="button" class="scale-btn" data-val="10">10</button>
+          </div>
+        </div>
+
+        <!-- Prezzo -->
+        <div class="rating-group">
+          <div class="rating-label">Rapporto Qualità / Prezzo</div>
+          <div class="rating-subtitle">* Nota: Le tariffe mediche non sono soggette a grandi modifiche.</div>
+          <div class="scale-container" data-category="prezzo">
+            <button type="button" class="scale-btn" data-val="1">1</button>
+            <button type="button" class="scale-btn" data-val="2">2</button>
+            <button type="button" class="scale-btn" data-val="3">3</button>
+            <button type="button" class="scale-btn" data-val="4">4</button>
+            <button type="button" class="scale-btn" data-val="5">5</button>
+            <button type="button" class="scale-btn" data-val="6">6</button>
+            <button type="button" class="scale-btn" data-val="7">7</button>
+            <button type="button" class="scale-btn" data-val="8">8</button>
+            <button type="button" class="scale-btn" data-val="9">9</button>
+            <button type="button" class="scale-btn" data-val="10">10</button>
+          </div>
+        </div>
+
+        <!-- Generale (Faccine) -->
+        <div class="rating-group">
+          <div class="rating-label">Valutazione Generale</div>
+          <div class="emoji-container" data-category="generale">
+            <button type="button" class="emoji-btn" data-val="2" title="Molto Insoddisfatto">😡</button>
+            <button type="button" class="emoji-btn" data-val="4" title="Insoddisfatto">🙁</button>
+            <button type="button" class="emoji-btn" data-val="6" title="Neutro">😐</button>
+            <button type="button" class="emoji-btn" data-val="8" title="Soddisfatto">🙂</button>
+            <button type="button" class="emoji-btn" data-val="10" title="Eccellente">🤩</button>
+          </div>
+        </div>
+
+        <!-- Commento libero -->
+        <div class="rating-group">
+          <div class="rating-label">Altro / Commenti Aggiuntivi</div>
+          <textarea id="comment" placeholder="Scrivi qui eventuali note..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Invia Valutazione</button>
+        <p class="note-text">Nessun dato personale o email viene richiesto o registrato.</p>
+      </form>
+    </div>
+
+    <div id="success-msg" class="success-msg">
+      <h2>Grazie!</h2>
+      <p>La tua valutazione è stata salvata con successo.</p>
+    </div>
+  </div>
+
+  <!-- Firebase JavaScript SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Configurazione Firebase fornita
+    const firebaseConfig = {
+      apiKey: "AIzaSyBW8TGd-r5cqdIUL_n0wwyeF5gtqBrGy34",
+      authDomain: "recensioni-musumeci.firebaseapp.com",
+      projectId: "recensioni-musumeci",
+      storageBucket: "recensioni-musumeci.firebasestorage.app",
+      messagingSenderId: "625660673721",
+      appId: "1:625660673721:web:b4517c38f8fb5f59a8a568"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const ratings = {
+      gentilezza: null,
+      serietà: null,
+      professionalità: null,
+      terapia: null,
+      prezzo: null,
+      generale: null
+    };
+
+    // Gestione Selezione
+    document.querySelectorAll('.scale-container, .emoji-container').forEach(container => {
+      const category = container.getAttribute('data-category');
+      const buttons = container.querySelectorAll('button');
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          ratings[category] = parseInt(btn.getAttribute('data-val'));
+        });
+      });
+    });
+
+    // Invio Form
+    document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      for (const [key, value] of Object.entries(ratings)) {
+        if (value === null) {
+          alert(`Per favore esprimi una valutazione per la voce: ${key.toUpperCase()}`);
+          return;
+        }
+      }
+
+      const scores = [
+        ratings.gentilezza,
+        ratings.serietà,
+        ratings.professionalità,
+        ratings.terapia,
+        ratings.prezzo,
+        ratings.generale
+      ];
+
+      // Condizioni
+      const isTopScore = scores.every(s => s >= 9);  // Tutti 9 o 10
+      const isLowScore = scores.every(s => s <= 3);  // Tutti <= 3
+
+      const comment = document.getElementById('comment').value;
+
+      const reviewData = {
+        ratings: ratings,
+        comment: comment,
+        createdAt: serverTimestamp(),
+        isTopScore: isTopScore,
+        isLowScore: isLowScore
+      };
+
+      try {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Salvataggio in corso...";
+
+        // 1. Salva la recensione nel database principale "reviews"
+        await addDoc(collection(db, "reviews"), reviewData);
+
+        // 2. Se è ECCELLENTE o MOLTO BASSO, crea una richiesta di invio mail nella collezione "mail"
+        if (isTopScore || isLowScore) {
+          let emailSubject = "";
+          let emailHtml = "";
+
+          if (isTopScore) {
+            emailSubject = "🎉 COMPLIMENTI! Hai ottenuto un punteggio ECCELLENTE!";
+            emailHtml = `
+              <div style="font-family: Arial, sans-serif; padding: 25px; background-color: #e8f5e9; border: 2px solid #2e7d32; border-radius: 12px; color: #1b5e20;">
+                <h1 style="color: #2e7d32; margin-top: 0;">🎉 SEI STATO ECCELLENTE! 🎉</h1>
+                <p style="font-size: 16px;">Gentile <strong>Dr. Giuseppe Musumeci</strong>,</p>
+                <p style="font-size: 16px;">Hai appena ricevuto una nuova recensione con il **massimo dei voti (9/10)** in tutte le categorie!</p>
+                
+                <div style="background: #ffffff; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #c8e6c9;">
+                  <h3 style="margin-top:0; color: #2e7d32;">Dettaglio Punteggi:</h3>
+                  <ul>
+                    <li><strong>Gentilezza:</strong> ${ratings.gentilezza}/10</li>
+                    <li><strong>Serietà:</strong> ${ratings.serietà}/10</li>
+                    <li><strong>Professionalità:</strong> ${ratings.professionalità}/10</li>
+                    <li><strong>Terapia:</strong> ${ratings.terapia}/10</li>
+                    <li><strong>Prezzo:</strong> ${ratings.prezzo}/10</li>
+                    <li><strong>Generale:</strong> ${ratings.generale}/10</li>
+                  </ul>
+                  ${comment ? `<p><strong>Commento:</strong> "${comment}"</p>` : ''}
+                </div>
+                <p style="font-weight: bold; font-size: 18px;">Continua così! 🥳🎈</p>
+              </div>
+            `;
+          } else if (isLowScore) {
+            emailSubject = "⚠️ ATTENZIONE: Ricevuta recensione con punteggio MOLTO BASSO";
+            emailHtml = `
+              <div style="font-family: Arial, sans-serif; padding: 25px; background-color: #ffebee; border: 2px solid #c62828; border-radius: 12px; color: #b71c1c;">
+                <h1 style="color: #c62828; margin-top: 0;">⚠️ FEEDBACK MOLTO CRITICO RICEVUTO</h1>
+                <p style="font-size: 16px;">Gentile <strong>Dr. Giuseppe Musumeci</strong>,</p>
+                <p style="font-size: 16px;">È stata appena registrata una recensione con **punteggi estremamente bassi (<= 3)** su tutte le voci.</p>
+                
+                <div style="background: #ffffff; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffcdd2;">
+                  <h3 style="margin-top:0; color: #c62828;">Dettaglio Punteggi:</h3>
+                  <ul>
+                    <li><strong>Gentilezza:</strong> ${ratings.gentilezza}/10</li>
+                    <li><strong>Serietà:</strong> ${ratings.serietà}/10</li>
+                    <li><strong>Professionalità:</strong> ${ratings.professionalità}/10</li>
+                    <li><strong>Terapia:</strong> ${ratings.terapia}/10</li>
+                    <li><strong>Prezzo:</strong> ${ratings.prezzo}/10</li>
+                    <li><strong>Generale:</strong> ${ratings.generale}/10</li>
+                  </ul>
+                  ${comment ? `<p><strong>Note del paziente:</strong> "${comment}"</p>` : ''}
+                </div>
+                <p style="font-weight: bold;">Si consiglia di verificare il feedback nell'area riservata.</p>
+              </div>
+            `;
+          }
+
+          // Salva nella collezione 'mail' per l'invio automatico
+          await addDoc(collection(db, "mail"), {
+            to: "info@drgiuseppemusumeci.com",
+            message: {
+              subject: emailSubject,
+              html: emailHtml
+            },
+            createdAt: serverTimestamp()
+          });
+        }
+
+        document.getElementById('form-content').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'block';
+
+      } catch (err) {
+        console.error("Errore:", err);
+        alert("Si è verificato un errore durante l'invio. Riprova.");
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').innerText = "Invia Valutazione";
+      }
+    });
+  </script>
+</body>
+</html>

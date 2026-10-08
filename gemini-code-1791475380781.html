@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Admin - Dr. Giuseppe Musumeci</title>
+  
+  <!-- Font Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --warning: #d97706;
+      --warning-bg: #fef3c7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* Schermata Login PIN */
+    #login-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .login-box {
+      background: white;
+      padding: 32px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+    }
+
+    .login-box h2 {
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .login-box p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      letter-spacing: 4px;
+      margin-bottom: 16px;
+      outline: none;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Layout Dashboard */
+    .dashboard-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-bar h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .header-bar p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Griglia Statistiche */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .stat-card .label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Barra Filtri */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Lista Recensioni */
+    .reviews-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .review-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      position: relative;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 12px;
+    }
+
+    .review-date {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-excellent { background: var(--success-bg); color: var(--success); }
+    .badge-critical { background: var(--danger-bg); color: var(--danger); }
+    .badge-neutral { background: var(--warning-bg); color: var(--warning); }
+
+    /* Griglia Punteggi Categorie */
+    .scores-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+      background: #f8fafc;
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .score-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .score-item .cat-name {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .score-item .cat-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .review-comment {
+      font-size: 14px;
+      color: #334155;
+      background: #f1f5f9;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+      margin-top: 12px;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .delete-btn:hover {
+      color: var(--danger);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Modal di Accesso PIN -->
+  <div id="login-overlay">
+    <div class="login-box">
+      <h2>Area Riservata Admin</h2>
+      <p>Inserisci il PIN per accedere alla gestione recensioni del Dr. Musumeci.</p>
+      <input type="password" id="pinInput" placeholder="****" maxlength="8" />
+      <button id="loginBtn">Accedi</button>
+    </div>
+  </div>
+
+  <!-- Dashboard Principale -->
+  <div class="dashboard-container" id="dashboard" style="display: none;">
+    
+    <div class="header-bar">
+      <div>
+        <h1>Dashboard Recensioni</h1>
+        <p>Pannello di controllo per il Dr. Giuseppe Musumeci</p>
+      </div>
+      <button onclick="location.reload()" class="filter-btn">🔄 Aggiorna</button>
+    </div>
+
+    <!-- Statistiche -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Totale Recensioni</div>
+        <div class="value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Media Voto Globale</div>
+        <div class="value" id="stat-avg">0.0 <span style="font-size: 16px; font-weight: normal;">/ 10</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Eccellenti (9-10)</div>
+        <div class="value" style="color: var(--success);" id="stat-excellent">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Critiche (<= 3)</div>
+        <div class="value" style="color: var(--danger);" id="stat-critical">0</div>
+      </div>
+    </div>
+
+    <!-- Filtri -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">Tutte le Recensioni</button>
+      <button class="filter-btn" data-filter="excellent">🎉 Eccellenti (9-10)</button>
+      <button class="filter-btn" data-filter="critical">⚠️ Critiche (<=3)</button>
+      <button class="filter-btn" data-filter="neutral">⚖️ Intermedie</button>
+    </div>
+
+    <!-- Elenco Recensioni -->
+    <div class="reviews-list" id="reviewsContainer">
+      <div class="empty-state">Caricamento recensioni in corso...</div>
+    </div>
+
+  </div>
+
+  <!-- Firebase JavaScript SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Configurazione Firebase del Dr. Musumeci
+    const firebaseConfig = {
+      apiKey: "AIzaSyBW8TGd-r5cqdIUL_n0wwyeF5gtqBrGy34",
+      authDomain: "recensioni-musumeci.firebaseapp.com",
+      projectId: "recensioni-musumeci",
+      storageBucket: "recensioni-musumeci.firebasestorage.app",
+      messagingSenderId: "625660673721",
+      appId: "1:625660673721:web:b4517c38f8fb5f59a8a568"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Sistema PIN di sicurezza semplice (Predefinito: 1234 - puoi cambiarlo qui sotto)
+    const ADMIN_PIN = "1234";
+
+    document.getElementById('loginBtn').addEventListener('click', checkPin);
+    document.getElementById('pinInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') checkPin();
+    });
+
+    function checkPin() {
+      const pin = document.getElementById('pinInput').value;
+      if (pin === ADMIN_PIN) {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        initRealtimeReviews();
+      } else {
+        alert("PIN errato. Riprova.");
+        document.getElementById('pinInput').value = '';
+      }
+    }
+
+    let allReviewsData = [];
+    let currentFilter = 'all';
+
+    // Ascolto in tempo reale da Firestore
+    function initRealtimeReviews() {
+      const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+
+      onSnapshot(q, (snapshot) => {
+        allReviewsData = [];
+        snapshot.forEach((docSnap) => {
+          allReviewsData.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        updateStats();
+        renderReviews();
+      }, (error) => {
+        console.error("Errore recupero recensioni:", error);
+        document.getElementById('reviewsContainer').innerHTML = `<div class="empty-state">Errore nel caricamento delle recensioni. Verificare le regole di sicurezza Firestore.</div>`;
+      });
+    }
+
+    // Calcolo Statistiche
+    function updateStats() {
+      const total = allReviewsData.length;
+      document.getElementById('stat-total').innerText = total;
+
+      if (total === 0) {
+        document.getElementById('stat-avg').innerText = "0.0";
+        document.getElementById('stat-excellent').innerText = "0";
+        document.getElementById('stat-critical').innerText = "0";
+        return;
+      }
+
+      let totalSum = 0;
+      let totalCategoriesCount = 0;
+      let excellentCount = 0;
+      let criticalCount = 0;
+
+      allReviewsData.forEach(r => {
+        const ratings = r.ratings || {};
+        const vals = Object.values(ratings);
+        
+        if (vals.length > 0) {
+          const sum = vals.reduce((a, b) => a + b, 0);
+          totalSum += sum;
+          totalCategoriesCount += vals.length;
+        }
+
+        if (r.isTopScore) excellentCount++;
+        if (r.isLowScore) criticalCount++;
+      });
+
+      const avgGlobal = totalCategoriesCount > 0 ? (totalSum / totalCategoriesCount).toFixed(1) : "0.0";
+      
+      document.getElementById('stat-avg').innerHTML = `${avgGlobal} <span style="font-size: 16px; font-weight: normal;">/ 10</span>`;
+      document.getElementById('stat-excellent').innerText = excellentCount;
+      document.getElementById('stat-critical').innerText = criticalCount;
+    }
+
+    // Render della lista recensioni
+    function renderReviews() {
+      const container = document.getElementById('reviewsContainer');
+      container.innerHTML = '';
+
+      const filtered = allReviewsData.filter(r => {
+        if (currentFilter === 'excellent') return r.isTopScore;
+        if (currentFilter === 'critical') return r.isLowScore;
+        if (currentFilter === 'neutral') return !r.isTopScore && !r.isLowScore;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state">Nessuna recensione trovata per questo filtro.</div>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const r = item.ratings || {};
+        const vals = Object.values(r);
+        const reviewAvg = vals.length > 0 ? (vals.reduce((a,b)=>a+b, 0) / vals.length).toFixed(1) : "N/D";
+
+        let badgeHtml = `<span class="badge badge-neutral">⚖️ Media: ${reviewAvg}/10</span>`;
+        if (item.isTopScore) {
+          badgeHtml = `<span class="badge badge-excellent">🎉 Eccellente (9-10)</span>`;
+        } else if (item.isLowScore) {
+          badgeHtml = `<span class="badge badge-critical">⚠️ Critica (<=3)</span>`;
+        }
+
+        // Formattazione Data
+        let formattedDate = "Data non disponibile";
+        if (item.createdAt && item.createdAt.toDate) {
+          formattedDate = item.createdAt.toDate().toLocaleString('it-IT', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          });
+        }
+
+        const card = document.createElement('div');
+        card.className = 'review-card';
+        card.innerHTML = `
+          <button class="delete-btn" title="Elimina recensione" data-id="${item.id}">🗑️</button>
+          
+          <div class="review-header">
+            <div>
+              ${badgeHtml}
+              <span style="font-weight: 600; font-size: 14px; margin-left: 8px;">Media scheda: ${reviewAvg}/10</span>
+            </div>
+            <div class="review-date">🕒 ${formattedDate}</div>
+          </div>
+
+          <div class="scores-grid">
+            <div class="score-item"><span class="cat-name">Gentilezza</span><span class="cat-val">${r.gentilezza ?? '-'} / 10</span></div>
+            <div class="score-item"><span class="cat-name">Serietà</span><span class="cat-val">${r.serietà ?? '-'} / 10</span></div>
+            <div class="score-item"><span class="cat-name">Professionalità</span><span class="cat-val">${r.professionalità ?? '-'} / 10</span></div>
+            <div class="score-item"><span class="cat-name">Terapia</span><span class="cat-val">${r.terapia ?? '-'} / 10</span></div>
+            <div class="score-item"><span class="cat-name">Prezzo</span><span class="cat-val">${r.prezzo ?? '-'} / 10</span></div>
+            <div class="score-item"><span class="cat-name">Generale</span><span class="cat-val">${r.generale ?? '-'} / 10</span></div>
+          </div>
+
+          ${item.comment ? `<div class="review-comment">💬 <strong>Commento paziente:</strong> "${item.comment}"</div>` : ''}
+        `;
+
+        // Gestione Eliminazione
+        card.querySelector('.delete-btn').addEventListener('click', async (e) => {
+          const docId = e.currentTarget.getAttribute('data-id');
+          if (confirm("Sei sicuro di voler eliminare questa recensione? L'azione è irreversibile.")) {
+            try {
+              await deleteDoc(doc(db, "reviews", docId));
+            } catch (err) {
+              alert("Errore durante l'eliminazione: " + err.message);
+            }
+          }
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // Gestione Filtri
+    document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn[data-filter]').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        renderReviews();
+      });
+    });
+  </script>
+</body>
+</html>
